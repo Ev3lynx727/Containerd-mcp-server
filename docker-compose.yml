@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    container_name: mcp-server-container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ~/.vscodeserver:/root/.vscode-server
+      - mcp-data:/app/data
+    env_file:
+      - .env  # Optional: create .env file with API keys if needed
+    ports:
+      - "3000-3005:3000-3005"
+    restart: unless-stopped
+
+volumes:
+  mcp-data:

@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+LICENSE
+
+# Docker
+docker-compose.yml
+.dockerignore
+
+# Scripts (exclude build scripts, keep runtime scripts)
+run-container.sh
+
+# CI/CD
+.github
+
+# Node modules (if any)
+node_modules
+
+# Logs
+*.log
+
+# Environment files (optional, user provides)
+# .env
+
+# OS files
+.DS_Store
+Thumbs.db
