@@ -28,4 +28,5 @@ start_server() {
 
 # Keep container running
 echo "MCP servers started. Container is running."
-wait
+# Keep the container alive
+tail -f /dev/null
