@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mcp-server:
-    build: .
+    image: ghcr.io/ev3lynx727/containerd-mcp-server:main
     container_name: mcp-server-container
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
