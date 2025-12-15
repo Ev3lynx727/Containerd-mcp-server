@@ -82,19 +82,30 @@ CONTEXT7_API_KEY=your_context7_api_key_here
 ```
 
 ### Connecting to MCP Servers
-Update your local MCP client config (e.g., opencode, VS Code) to connect to the container:
+Update your local MCP client config (e.g., opencode) to connect to the containerized servers.
 
+**Config File Location**: Place the config in `~/.config/opencode/opencode.jsonc` (create the directory if it doesn't exist).
+
+**Example Config for OpenCode**:
 ```json
 {
+  "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "containerd_mcp": {
+    "mcp_everything": {
       "type": "remote",
       "url": "http://localhost:3001",
+      "enabled": true
+    },
+    "playwright": {
+      "type": "remote",
+      "url": "http://localhost:3002",
       "enabled": true
     }
   }
 }
 ```
+
+This connects to the running container's MCP servers via HTTP/SSE. Restart your MCP client after updating the config.
 
 ## Customization
 - Edit `Dockerfile` to add/remove MCP servers.
