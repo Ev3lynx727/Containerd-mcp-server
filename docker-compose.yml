@@ -4,14 +4,24 @@ services:
   mcp-server:
     image: ghcr.io/ev3lynx727/containerd-mcp-server:main
     container_name: mcp-server-container
+    network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ~/.vscodeserver:/root/.vscode-server
       - mcp-data:/app/data
     env_file:
       - .env  # Optional: create .env file with API keys if needed
-    ports:
-      - "3000-3005:3000-3005"
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=2048
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
     restart: unless-stopped
 
 volumes:
