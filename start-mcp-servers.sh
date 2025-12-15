@@ -1,32 +1,17 @@
 #!/bin/bash
 
-# Start MCP servers for remote connections
+# Start MCP servers in HTTP mode for remote access
 
 echo "Starting MCP servers..."
 
-# Function to start a server in background
-start_server() {
-    local name=$1
-    local command=$2
-    echo "Starting $name server..."
-    eval "$command" &
-    echo "$name started on PID $!"
-}
+# Start server-everything in SSE mode (default port 3001)
+npx @modelcontextprotocol/server-everything sse &
+echo "server-everything started (SSE on port 3001) PID $!"
 
-# Start remote MCP servers (assuming they support HTTP)
-# Note: Adjust commands based on actual server capabilities
+# Start Playwright MCP in HTTP/SSE mode on port 3002
+npx @playwright/mcp --port 3002 &
+echo "playwright started (HTTP/SSE on port 3002) PID $!"
 
-# GitHub MCP (if supports HTTP)
-# start_server "GitHub MCP" "npx @modelcontextprotocol/server-github --port 3000"
-
-# Docker MCP - CLI tool, not HTTP server
-# Note: Docker MCP is available as CLI tool, not as HTTP server
-# Access via: docker exec -it <container> npx @0xshariq/docker-mcp-server
-
-# For local servers like Playwright, they need stdio, so perhaps run them as services
-# But for remote, we need HTTP versions
-
-# Keep container running
 echo "MCP servers started. Container is running."
 # Keep the container alive
 tail -f /dev/null
