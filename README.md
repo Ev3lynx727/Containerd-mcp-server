@@ -93,12 +93,12 @@ Update your local MCP client config (e.g., opencode) to connect to the container
   "mcp": {
     "mcp_everything": {
       "type": "remote",
-      "url": "http://localhost:3001",
+      "url": "http://localhost:3001/sse",
       "enabled": true
     },
     "playwright": {
       "type": "remote",
-      "url": "http://localhost:3002",
+      "url": "http://localhost:3002/mcp",
       "enabled": true
     }
   }
