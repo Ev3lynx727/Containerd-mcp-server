@@ -85,5 +85,5 @@ EXPOSE 3000-3005
 COPY start-mcp-servers.sh /app/start-mcp-servers.sh
 RUN chmod +x /app/start-mcp-servers.sh
 
-# Default command: run MCP servers
-CMD ["/app/start-mcp-servers.sh"]
+# Default command: keep container running
+CMD ["tail", "-f", "/dev/null"]
