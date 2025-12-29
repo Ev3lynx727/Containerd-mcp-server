@@ -19,6 +19,8 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 - **VS Code Server** (`~/.vscodeserver:/root/.vscode-server`): Shares VS Code extensions/settings.
 - **.env** (`.env`): Optional environment file for API keys (Context7, etc.).
 - **Shared Data** (`mcp-data:/app/data`): Named volume for persistent MCP data.
+- **Netdata Lib** (`netdata-lib:/var/lib/netdata`): Persistent storage for Netdata data.
+- **Netdata Cache** (`netdata-cache:/var/cache/netdata`): Cache for Netdata.
 
 ## MCP Servers Included
 
@@ -32,13 +34,14 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 - **context7**: Code context and analysis (requires API key)
 - **gh_grep**: GitHub code search
 - **github**: GitHub repository operations
+- **netdata**: Infrastructure monitoring and observability data access
 
 ### Tools
 - **mgrep**: Semantic search for code and documents
 - **MCP SDK**: Model Context Protocol framework
 
 ## Environment
-- Includes: MCP SDK, mgrep (semantic search), Playwright (browser automation), REST API Tester, Docker MCP.
+- Includes: MCP SDK, mgrep (semantic search), Playwright (browser automation), REST API Tester, Docker MCP, Netdata (monitoring).
 
 ## Development Setup
 
@@ -99,6 +102,11 @@ Update your local MCP client config (e.g., opencode) to connect to the container
     "playwright": {
       "type": "remote",
       "url": "http://localhost:3002/mcp",
+      "enabled": true
+    },
+    "netdata": {
+      "type": "remote",
+      "url": "http://localhost:19999/sse",
       "enabled": true
     }
   }
