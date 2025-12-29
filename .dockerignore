@@ -22,7 +22,7 @@ node_modules
 # Logs
 *.log
 
-# Environment files (optional, user provides)
+# Environment files (optional, user provides - cannot exclude as Dockerfile needs it)
 # .env
 
 # OS files
