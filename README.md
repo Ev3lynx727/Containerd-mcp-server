@@ -63,6 +63,7 @@ cd Containerd-mcp-server
 
 # Optional: Create .env with API keys
 echo "CONTEXT7_API_KEY=your_key" > .env
+echo "NETDATA_MCP_API_KEY=your_netdata_key" >> .env
 
 # Build and run
 docker-compose up -d --build
