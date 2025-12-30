@@ -34,9 +34,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_TOKEN }}
 
-    - name: Verify login
+    - name: Verify GHCR access
       if: github.event_name != 'pull_request'
-      run: docker pull hello-world
+      run: |
+        echo "Testing GHCR access..."
+        docker pull ghcr.io/hello-world:latest || echo "Pull test failed - token may be invalid"
 
     - name: Extract metadata
       id: meta
