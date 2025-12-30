@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
     - name: Checkout repository
@@ -32,6 +33,10 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_TOKEN }}
+
+    - name: Verify login
+      if: github.event_name != 'pull_request'
+      run: docker pull hello-world
 
     - name: Extract metadata
       id: meta
