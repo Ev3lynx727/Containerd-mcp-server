@@ -75,6 +75,8 @@ Pull from registry: `ghcr.io/ev3lynx727/containerd-mcp-server:latest`
 ### Build Status
 Automated builds are configured via GitHub Actions. Check the Actions tab for build status.
 
+**Latest Update**: Netdata MCP server integration added with monitoring capabilities.
+
 ## Configuration
 
 ### Environment Variables
