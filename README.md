@@ -72,6 +72,9 @@ docker-compose up -d --build
 ### Kubernetes/Cloud
 Pull from registry: `ghcr.io/ev3lynx727/containerd-mcp-server:latest`
 
+### Build Status
+Automated builds are configured via GitHub Actions. Check the Actions tab for build status.
+
 ## Configuration
 
 ### Environment Variables
