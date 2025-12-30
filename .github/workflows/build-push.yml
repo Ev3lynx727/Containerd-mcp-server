@@ -3,7 +3,6 @@ name: Build and Push Docker Image
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ main ]
 
@@ -25,21 +24,6 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-
-    - name: Debug authentication
-      if: github.event_name != 'pull_request'
-      run: |
-        echo "GitHub Actor: ${{ github.actor }}"
-        echo "Registry: ${{ env.REGISTRY }}"
-        if [ -z "$GHCR_TOKEN" ]; then
-          echo "❌ GHCR_TOKEN secret is NOT set"
-          exit 1
-        else
-          echo "✅ GHCR_TOKEN secret is set (length: ${#GHCR_TOKEN})"
-        fi
-        docker info
-      env:
-        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
     - name: Log in to Container Registry
       if: github.event_name != 'pull_request'
@@ -69,3 +53,4 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        provenance: false
