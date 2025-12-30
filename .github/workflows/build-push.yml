@@ -31,9 +31,15 @@ jobs:
       run: |
         echo "GitHub Actor: ${{ github.actor }}"
         echo "Registry: ${{ env.REGISTRY }}"
-        echo "Token length: ${#GHCR_TOKEN}"
-        echo "Token starts with: ${GHCR_TOKEN:0:4}"
+        if [ -z "$GHCR_TOKEN" ]; then
+          echo "❌ GHCR_TOKEN secret is NOT set"
+          exit 1
+        else
+          echo "✅ GHCR_TOKEN secret is set (length: ${#GHCR_TOKEN})"
+        fi
         docker info
+      env:
+        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
     - name: Log in to Container Registry
       if: github.event_name != 'pull_request'
