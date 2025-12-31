@@ -54,7 +54,7 @@ fi
 
 # Test MCP Netdata proxy
 echo "Testing MCP Netdata proxy..."
-if timeout 5 bash -c "</dev/tcp/localhost/3003" 2>/dev/null; then
+if curl -f -s http://localhost:3051/health > /dev/null; then
     echo "✓ MCP Netdata proxy accessible"
 else
     echo "✗ MCP Netdata proxy not accessible"

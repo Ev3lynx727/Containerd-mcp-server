@@ -45,15 +45,15 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
     restart: unless-stopped
 
-  # mcp-netdata-proxy:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.proxy
-  #   container_name: mcp-netdata-proxy-container
-  #   network_mode: host
-  #   depends_on:
-  #     - netdata
-  #   restart: unless-stopped
+  mcp-netdata-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    container_name: mcp-netdata-proxy-container
+    network_mode: host
+    depends_on:
+      - netdata
+    restart: unless-stopped
 
 volumes:
   mcp-data:
