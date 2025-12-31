@@ -73,9 +73,9 @@ RUN cat > /root/.config/opencode/config.jsonc << 'EOF'
       "command": ["npx", "dkmaker-mcp-rest-api"],
       "enabled": true
     },
-    "netdata": {
+    "mcp-netdata-proxy": {
       "type": "remote",
-      "url": "http://localhost:19999/sse",
+      "url": "http://localhost:3003/sse",
       "enabled": true
     }
     // Docker MCP removed - it's a CLI tool, not HTTP server
