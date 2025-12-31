@@ -20,7 +20,11 @@ check_container() {
 
 # Stop and remove existing containers
 echo "Stopping existing containers..."
-docker-compose down
+docker-compose down --remove-orphans
+
+# Remove any orphaned containers with matching names
+echo "Removing orphaned containers..."
+docker rm -f mcp-server-container netdata-container mcp-netdata-proxy-container 2>/dev/null || true
 
 # Rebuild images if needed (uncomment if Dockerfile changes)
 # echo "Rebuilding images..."

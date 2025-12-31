@@ -9,9 +9,10 @@ RUN npm install
 
 # Copy server script
 COPY netdata-mcp-server.js /app/netdata-mcp-server.js
+RUN chmod +x /app/netdata-mcp-server.js
 
 # Expose port
 EXPOSE 3003
 
 # Run the server
-CMD ["node", "netdata-mcp-server.js"]
+CMD ["node", "/app/netdata-mcp-server.js", "--port", "3051"]
