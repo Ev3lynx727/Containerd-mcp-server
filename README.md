@@ -15,7 +15,7 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 4. Update local opencode config to connect to `http://localhost:3001` (etc.).
 
 ## Volumes & Shared Data
-- **Docker Socket** (`/var/run/docker.sock:ro`): Read-only mount for Docker MCP to manage host containers.
+- **Docker Socket** (`/var/run/docker.sock:ro`): Read-only mount for Docker MCP to manage host containers, and Netdata Docker monitoring.
 - **VS Code Server** (`~/.vscodeserver:/root/.vscode-server`): Shares VS Code extensions/settings.
 - **.env** (`.env`): Optional environment file for API keys (Context7, etc.).
 - **Shared Data** (`mcp-data:/app/data`): Named volume for persistent MCP data.
@@ -34,7 +34,7 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 - **context7**: Code context and analysis (requires API key)
 - **gh_grep**: GitHub code search
 - **github**: GitHub repository operations
-- **netdata**: Infrastructure monitoring and observability data access
+- **netdata**: Infrastructure monitoring, Docker container monitoring, and observability data access
 
 ### Tools
 - **mgrep**: Semantic search for code and documents
@@ -75,7 +75,7 @@ Pull from registry: `ghcr.io/ev3lynx727/containerd-mcp-server:latest`
 ### Build Status
 Automated builds are configured via GitHub Actions. Check the Actions tab for build status.
 
-**Latest Update**: Netdata MCP server integration added with monitoring capabilities. Ready for cloud deployment.
+**Latest Update**: Netdata MCP server integration with Docker container monitoring enabled. Ready for cloud deployment.
 
 ## Configuration
 
@@ -219,7 +219,7 @@ update every = 5
 # Disabled memory-intensive plugins
 apps = no
 ebpf = no
-cgroups = no
+cgroups = yes
 ```
 
 Netdata container is limited to 256MB RAM with CPU limits.
