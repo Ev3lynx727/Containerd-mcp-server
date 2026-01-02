@@ -24,7 +24,7 @@ docker-compose down --remove-orphans
 
 # Remove any orphaned containers with matching names
 echo "Removing orphaned containers..."
-docker rm -f mcp-server-container netdata-container mcp-netdata-proxy-container 2>/dev/null || true
+docker rm -f mcp-server-container netdata-container mcp-netdata-proxy-container mcp-inspector-container 2>/dev/null || true
 
 # Rebuild images if needed (uncomment if Dockerfile changes)
 # echo "Rebuilding images..."
@@ -43,6 +43,7 @@ echo "Checking container status..."
 check_container "netdata-container"
 check_container "mcp-server-container"
 check_container "mcp-netdata-proxy-container"
+check_container "mcp-inspector-container"
 
 # Test Netdata access
 echo "Testing Netdata access..."
@@ -60,6 +61,15 @@ else
     echo "✗ MCP Netdata proxy not accessible"
 fi
 
+# Test MCP Inspector access
+echo "Testing MCP Inspector access..."
+if curl -f -s http://localhost:6274 > /dev/null; then
+    echo "✓ MCP Inspector accessible"
+else
+    echo "✗ MCP Inspector not accessible"
+fi
+
 echo "=== Deployment Complete ==="
 echo "Netdata Dashboard: http://localhost:19999"
-echo "MCP Server: Running with updated Netdata integration"
+echo "MCP Inspector: http://localhost:6274"
+echo "MCP Server: Running with Netdata integration and Inspector"

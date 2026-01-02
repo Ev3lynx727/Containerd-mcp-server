@@ -10,7 +10,8 @@ echo " - Docker socket mounted (read-only)"
 echo " - VS Code server data shared"
 echo " - .env mounted (read-only)"
 echo " - Named volume 'mcp-data' for shared data"
-echo "Access MCP servers on localhost:3000-3005"
+echo "Access MCP servers on localhost:3000-3005 and MCP Inspector on localhost:6274"
+echo " - MCP Inspector available for testing and debugging"
 
 # Auto-update OpenCode config
 CONFIG_FILE="$HOME/.config/opencode/opencode.jsonc"

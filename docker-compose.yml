@@ -67,6 +67,15 @@ services:
       - netdata
     restart: unless-stopped
 
+  mcp-inspector:
+    image: ghcr.io/modelcontextprotocol/inspector:latest
+    container_name: mcp-inspector-container
+    network_mode: host
+    environment:
+      - HOST=0.0.0.0
+      - MCP_AUTO_OPEN_ENABLED=false
+    restart: unless-stopped
+
 volumes:
   mcp-data:
   netdata-lib:

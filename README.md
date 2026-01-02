@@ -4,15 +4,16 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 
 ## Files
 - `Dockerfile`: Builds the container with MCP servers.
-- `docker-compose.yml`: Defines services with volume mounts.
+- `docker-compose.yml`: Defines services including MCP servers, Netdata, and MCP Inspector.
 - `run-container.sh`: Script to build and run with docker-compose.
 - `start-mcp-servers.sh`: Starts the MCP servers in the container.
 
 ## Usage
 1. Ensure Docker and docker-compose are installed.
 2. Run `./run-container.sh` to build and start the container.
-3. Container exposes MCP servers on ports 3000-3005.
+3. Container exposes MCP servers on ports 3000-3005 and MCP Inspector on port 6274.
 4. Update local opencode config to connect to `http://localhost:3001` (etc.).
+5. Access MCP Inspector at `http://localhost:6274` for testing and debugging.
 
 ## Volumes & Shared Data
 - **Docker Socket** (`/var/run/docker.sock:ro`): Read-only mount for Docker MCP to manage host containers, and Netdata Docker monitoring.
@@ -39,6 +40,39 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 ### Tools
 - **mgrep**: Semantic search for code and documents
 - **MCP SDK**: Model Context Protocol framework
+- **MCP Inspector**: Web-based UI for testing and debugging MCP servers (available at http://localhost:6274)
+
+## MCP Inspector
+
+The MCP Inspector is a web-based developer tool for testing and debugging your MCP servers. It provides an interactive interface to inspect server capabilities, test tools, resources, and prompts, and monitor server behavior.
+
+### Accessing the Inspector
+- **URL**: http://localhost:6274
+- **Authentication**: Requires a session token (automatically handled in containerized setup)
+- **Auto-open**: Disabled in container mode to prevent browser interference
+
+### Connecting to MCP Servers
+Use the Inspector's web interface to connect to your stack's MCP servers:
+
+| Server | Transport | Endpoint |
+|--------|-----------|----------|
+| mcp_everything | SSE | http://localhost:3001/sse |
+| playwright | Streamable HTTP | http://localhost:3002/mcp |
+| rest_api_tester | Streamable HTTP | http://localhost:3003/mcp |
+| netdata | SSE | http://localhost:19999/sse |
+
+### Features
+- **Server Connection Pane**: Configure transport and connection settings
+- **Resources Tab**: List and inspect available resources
+- **Prompts Tab**: Test prompt templates with custom arguments
+- **Tools Tab**: Execute tools with custom inputs and view results
+- **Notifications Pane**: Monitor server logs and notifications
+
+### Best Practices
+- Use for iterative development and debugging of MCP servers
+- Test edge cases like invalid inputs and concurrent operations
+- Monitor server responses and error handling
+- Export server configurations for use in other MCP clients
 
 ## Environment
 - Includes: MCP SDK, mgrep (semantic search), Playwright (browser automation), REST API Tester, Docker MCP, Netdata (monitoring).
