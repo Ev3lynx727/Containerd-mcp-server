@@ -21,7 +21,8 @@ RUN npm install -g \
     @modelcontextprotocol/sdk \
     @playwright/mcp \
     dkmaker-mcp-rest-api \
-    @0xshariq/docker-mcp-server
+    @0xshariq/docker-mcp-server \
+    markdownlint
 
 # Install Playwright browsers
 RUN npx playwright install
@@ -85,6 +86,9 @@ EOF
 
 # Expose ports for remote MCP servers
 EXPOSE 3000-3005
+
+# Copy MCP server files
+COPY markdownlint-mcp-server.js /app/markdownlint-mcp-server.js
 
 # Copy startup script
 COPY start-mcp-servers.sh /app/start-mcp-servers.sh

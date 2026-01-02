@@ -29,6 +29,7 @@ A containerized MCP (Model Context Protocol) server suite for VM and cloud deplo
 - **mcp_everything**: General utilities (file ops, git, SQLite)
 - **playwright**: Browser automation and testing
 - **rest_api_tester**: REST API testing and debugging
+- **markdownlint**: Markdown file linting and formatting
 - **docker**: Docker container management
 
 ### Remote Servers (Configured)
@@ -59,6 +60,7 @@ Use the Inspector's web interface to connect to your stack's MCP servers:
 | mcp_everything | SSE | http://localhost:3001/sse |
 | playwright | Streamable HTTP | http://localhost:3002/mcp |
 | rest_api_tester | Streamable HTTP | http://localhost:3003/mcp |
+| markdownlint | Local (stdio) | N/A |
 | netdata | SSE | http://localhost:19999/sse |
 
 ### Features

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mcp-server:
-    image: ghcr.io/ev3lynx727/containerd-mcp-server:latest
+    build: .
     container_name: mcp-server-container
     network_mode: host
     volumes:

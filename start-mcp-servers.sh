@@ -15,7 +15,18 @@ echo "Pre-warm complete"
 npx @modelcontextprotocol/server-everything sse &
 echo "server-everything started (SSE on port 3001) PID $!"
 
+# Start Playwright MCP in HTTP mode on port 3002
+npx @playwright/mcp --port 3002 --host 0.0.0.0 &
+echo "playwright started (HTTP on port 3002) PID $!"
+
+# Start REST API Tester MCP on port 3003
+npx dkmaker-mcp-rest-api --port 3003 --host 0.0.0.0 &
+echo "rest_api_tester started (HTTP on port 3003) PID $!"
+
+# Start MarkdownLint MCP server (stdio mode)
+node /app/markdownlint-mcp-server.js &
+echo "markdownlint started (stdio mode) PID $!"
+
 echo "MCP servers started. Container is running."
-echo "Note: Playwright and REST API servers are handled by mcp-stdio-proxy"
 # Keep the container alive
 tail -f /dev/null
