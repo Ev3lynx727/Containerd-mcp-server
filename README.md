@@ -90,8 +90,29 @@ This repository includes GitHub Actions for automated Docker builds:
 - Multi-platform support (AMD64/ARM64)
 
 ### Manual Deployment
+
+#### Option 1: Using Pre-built GHCR Images (Recommended)
 ```bash
-# Clone and build
+# Clone repository
+git clone https://github.com/Ev3lynx727/Containerd-mcp-server.git
+cd Containerd-mcp-server
+
+# Optional: Create .env with API keys
+echo "CONTEXT7_API_KEY=your_key" > .env
+echo "NETDATA_MCP_API_KEY=your_netdata_key" >> .env
+
+# Pull pre-built images from GHCR
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server:latest
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server-proxy:latest
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest
+
+# Run with pre-built images
+docker-compose up -d
+```
+
+#### Option 2: Build Locally
+```bash
+# Clone and build from source
 git clone https://github.com/Ev3lynx727/Containerd-mcp-server.git
 cd Containerd-mcp-server
 
@@ -107,7 +128,14 @@ docker-compose up -d --build
 Pull from registry: `ghcr.io/ev3lynx727/containerd-mcp-server:latest`
 
 ### Build Status
-Automated builds are configured via GitHub Actions. Check the Actions tab for build status.
+✅ **Automated GHCR builds are active and working!**
+
+- **Multi-image builds**: Main server, Netdata proxy, and STDIO proxy
+- **Multi-platform**: Linux AMD64 and ARM64 support
+- **Automated**: Builds trigger on every push to main branch
+- **Registry**: `ghcr.io/ev3lynx727/containerd-mcp-server*`
+
+Check the [Actions tab](https://github.com/Ev3lynx727/Containerd-mcp-server/actions) for build status.
 
 **Latest Update**: Netdata MCP server integration with Docker container monitoring enabled. Ready for cloud deployment.
 

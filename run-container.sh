@@ -10,6 +10,7 @@ echo " - Docker socket mounted (read-only)"
 echo " - VS Code server data shared"
 echo " - .env mounted (read-only)"
 echo " - Named volume 'mcp-data' for shared data"
+echo "Using pre-built GHCR images for faster deployment"
 echo "Access MCP servers on localhost:3000-3005 and MCP Inspector on localhost:6274"
 echo " - MCP Inspector available for testing and debugging"
 

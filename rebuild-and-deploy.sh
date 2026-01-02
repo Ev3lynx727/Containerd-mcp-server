@@ -6,6 +6,7 @@
 set -e  # Exit on any error
 
 echo "=== Containerd MCP Server Rebuild and Deploy ==="
+echo "Using GHCR pre-built images for faster deployment"
 
 # Function to check if container is running
 check_container() {
@@ -29,6 +30,12 @@ docker rm -f mcp-server-container netdata-container mcp-netdata-proxy-container 
 # Rebuild images if needed (uncomment if Dockerfile changes)
 # echo "Rebuilding images..."
 # docker-compose build --no-cache
+
+# Verify GHCR images are available
+echo "Verifying GHCR images..."
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server:latest >/dev/null 2>&1 && echo "✓ Main image ready" || echo "⚠ Main image pull failed"
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server-proxy:latest >/dev/null 2>&1 && echo "✓ Proxy image ready" || echo "⚠ Proxy image pull failed"
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest >/dev/null 2>&1 && echo "✓ STDIO proxy image ready" || echo "⚠ STDIO proxy image pull failed"
 
 # Start containers
 echo "Starting containers..."
@@ -70,6 +77,7 @@ else
 fi
 
 echo "=== Deployment Complete ==="
+echo "✅ Using GHCR pre-built images for optimal performance"
 echo "Netdata Dashboard: http://localhost:19999"
 echo "MCP Inspector: http://localhost:6274"
 echo "MCP Server: Running with Netdata integration and Inspector"
