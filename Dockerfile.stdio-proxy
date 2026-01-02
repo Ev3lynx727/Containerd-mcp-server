@@ -1,0 +1,12 @@
+FROM node:18
+
+WORKDIR /app
+
+COPY mcp-proxy/package.json .
+RUN npm install
+
+COPY mcp-proxy/proxy.js .
+
+EXPOSE 3004
+
+CMD ["node", "proxy.js"]

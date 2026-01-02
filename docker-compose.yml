@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mcp-server:
-    image: ghcr.io/ev3lynx727/containerd-mcp-server:main
+    image: ghcr.io/ev3lynx727/containerd-mcp-server:latest
     container_name: mcp-server-container
     network_mode: host
     volumes:
@@ -58,9 +58,7 @@ services:
     restart: unless-stopped
 
   mcp-netdata-proxy:
-    build:
-      context: .
-      dockerfile: Dockerfile.proxy
+    image: ghcr.io/ev3lynx727/containerd-mcp-server-proxy:latest
     container_name: mcp-netdata-proxy-container
     network_mode: host
     depends_on:
@@ -74,6 +72,15 @@ services:
     environment:
       - HOST=0.0.0.0
       - MCP_AUTO_OPEN_ENABLED=false
+      - DANGEROUSLY_OMIT_AUTH=true
+    restart: unless-stopped
+
+  mcp-stdio-proxy:
+    image: ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest
+    container_name: mcp-stdio-proxy-container
+    network_mode: host
+    depends_on:
+      - mcp-server
     restart: unless-stopped
 
 volumes:

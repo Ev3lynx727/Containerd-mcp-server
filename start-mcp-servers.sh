@@ -15,10 +15,7 @@ echo "Pre-warm complete"
 npx @modelcontextprotocol/server-everything sse &
 echo "server-everything started (SSE on port 3001) PID $!"
 
-# Start Playwright MCP in HTTP/SSE mode on port 3002
-npx @playwright/mcp --port 3002 &
-echo "playwright started (HTTP/SSE on port 3002) PID $!"
-
 echo "MCP servers started. Container is running."
+echo "Note: Playwright and REST API servers are handled by mcp-stdio-proxy"
 # Keep the container alive
 tail -f /dev/null
