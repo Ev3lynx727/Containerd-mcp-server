@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mcp-server:
-    build: .
+    image: ghcr.io/ev3lynx727/containerd-mcp-server:latest
     container_name: mcp-server-container
     network_mode: host
     volumes:
@@ -13,6 +13,9 @@ services:
       - .env  # Optional: create .env file with API keys if needed
     environment:
       - NODE_OPTIONS=--max-old-space-size=2048
+      - NODE_PATH=/app/node_modules
+      - REST_BASE_URL=https://api.example.com
+      - AUTH_BEARER=${AUTH_BEARER:-}
     deploy:
       resources:
         limits:

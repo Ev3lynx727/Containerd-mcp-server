@@ -24,6 +24,7 @@ npx dkmaker-mcp-rest-api --port 3003 --host 0.0.0.0 &
 echo "rest_api_tester started (HTTP on port 3003) PID $!"
 
 # Start MarkdownLint MCP server (stdio mode)
+export NODE_PATH=/app/node_modules
 node /app/markdownlint-mcp-server.js &
 echo "markdownlint started (stdio mode) PID $!"
 
