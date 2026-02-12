@@ -23,9 +23,9 @@ echo "playwright started (HTTP on port 3002) PID $!"
 npx dkmaker-mcp-rest-api --port 3003 --host 0.0.0.0 &
 echo "rest_api_tester started (HTTP on port 3003) PID $!"
 
-# Start MarkdownLint MCP server (stdio mode)
-export NODE_PATH=/app/node_modules
-node /app/markdownlint-mcp-server.js &
+# Start MarkdownLint MCP server (stdio mode) - commented out, using HTTP version
+# export NODE_PATH=/app/node_modules
+# node /app/markdownlint-mcp-server.js &
 echo "markdownlint started (stdio mode) PID $!"
 
 echo "MCP servers started. Container is running."

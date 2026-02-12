@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import { Server } from '@modelcontextprotocol/sdk/server';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { McpServer } from '/app/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js';
+import { StreamableHTTPServerTransport } from '/app/node_modules/@modelcontextprotocol/sdk/dist/esm/server/streamableHttp.js';
+import { createMcpExpressApp } from '/app/node_modules/@modelcontextprotocol/sdk/dist/esm/server/express.js';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 class MarkdownLintMCPServer {
   constructor() {
-    this.server = new Server(
+    this.server = new McpServer(
       {
         name: 'markdownlint-mcp-server',
         version: '1.0.0',
@@ -22,88 +22,76 @@ class MarkdownLintMCPServer {
     );
 
     this.setupToolHandlers();
-    this.setupRequestHandlers();
   }
 
   setupToolHandlers() {
-    // List available tools
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: [
-          {
-            name: 'lint_markdown',
-            description: 'Lint markdown files for formatting issues and optionally fix them',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                files: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: 'Array of markdown file paths to lint (supports glob patterns)',
-                },
-                fix: {
-                  type: 'boolean',
-                  description: 'Automatically fix linting issues when possible',
-                  default: false,
-                },
-                config: {
-                  type: 'string',
-                  description: 'Path to custom markdownlint configuration file',
-                },
-                directory: {
-                  type: 'string',
-                  description: 'Directory to scan for markdown files (if no files specified)',
-                  default: '/app',
-                },
-              },
-              required: ['files'],
-            },
+    this.server.registerTool('lint_markdown', {
+      description: 'Lint markdown files for formatting issues and optionally fix them',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          files: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Array of markdown file paths to lint (supports glob patterns)',
           },
-          {
-            name: 'lint_markdown_directory',
-            description: 'Lint all markdown files in a directory recursively',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                directory: {
-                  type: 'string',
-                  description: 'Directory to scan for markdown files',
-                  default: '/app',
-                },
-                fix: {
-                  type: 'boolean',
-                  description: 'Automatically fix linting issues when possible',
-                  default: false,
-                },
-                config: {
-                  type: 'string',
-                  description: 'Path to custom markdownlint configuration file',
-                },
-                pattern: {
-                  type: 'string',
-                  description: 'File pattern to match (default: **/*.md)',
-                  default: '**/*.md',
-                },
-              },
-            },
+          fix: {
+            type: 'boolean',
+            description: 'Automatically fix linting issues when possible',
+            default: false,
           },
-        ],
-      };
+          config: {
+            type: 'string',
+            description: 'Path to custom markdownlint configuration file',
+          },
+          directory: {
+            type: 'string',
+            description: 'Directory to scan for markdown files (if no files specified)',
+            default: '/app',
+          },
+        },
+        required: ['files'],
+      },
+    }, async (args) => {
+      try {
+        return await this.lintMarkdownFiles(args);
+      } catch (error) {
+        return {
+          content: [{ type: 'text', text: `Error: ${error.message}` }],
+          isError: true,
+        };
+      }
     });
 
-    // Handle tool calls
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      const { name, arguments: args } = request.params;
-
+    this.server.registerTool('lint_markdown_directory', {
+      description: 'Lint all markdown files in a directory recursively',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          directory: {
+            type: 'string',
+            description: 'Directory to scan for markdown files',
+            default: '/app',
+          },
+          fix: {
+            type: 'boolean',
+            description: 'Automatically fix linting issues when possible',
+            default: false,
+          },
+          config: {
+            type: 'string',
+            description: 'Path to custom markdownlint configuration file',
+          },
+          pattern: {
+            type: 'string',
+            description: 'File pattern to match (default: **/*.md)',
+            default: '**/*.md',
+          },
+        },
+      },
+    }, async (args) => {
       try {
-        switch (name) {
-          case 'lint_markdown':
-            return await this.lintMarkdownFiles(args);
-          case 'lint_markdown_directory':
-            return await this.lintMarkdownDirectory(args);
-          default:
-            throw new Error(`Unknown tool: ${name}`);
-        }
+        return await this.lintMarkdownDirectory(args);
       } catch (error) {
         return {
           content: [{ type: 'text', text: `Error: ${error.message}` }],
@@ -265,9 +253,12 @@ class MarkdownLintMCPServer {
 
   async run() {
     console.log('Starting MarkdownLint MCP server...');
-    const transport = new StdioServerTransport();
+    const transport = new StreamableHTTPServerTransport();
     await this.server.connect(transport);
-    console.log('MarkdownLint MCP server started');
+    const app = createMcpExpressApp(this.server, transport);
+    app.listen(3005, () => {
+      console.log('MarkdownLint MCP server started on port 3005');
+    });
   }
 }
 

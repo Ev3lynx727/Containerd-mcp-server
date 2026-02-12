@@ -49,7 +49,7 @@ RUN npx playwright install
 WORKDIR /app
 
 # Set NODE_PATH for local module resolution
-ENV NODE_PATH=/app/node_modules
+ENV NODE_PATH=/usr/local/lib/node_modules:/app/node_modules
 
 # Copy environment file (if available)
 COPY .env* ./
