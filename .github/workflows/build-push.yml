@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master, main ]
 
 env:
   REGISTRY: ghcr.io
@@ -51,19 +51,6 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        provenance: false
-
-    - name: Build and push proxy Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: Dockerfile.proxy
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}-proxy:latest
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
