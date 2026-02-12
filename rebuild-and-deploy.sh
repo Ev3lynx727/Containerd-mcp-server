@@ -35,12 +35,11 @@ docker-compose down --remove-orphans 2>/dev/null || true
 
 # Remove any orphaned containers
 echo "Removing orphaned containers..."
-docker rm -f mcp-server-container netdata-container mcp-netdata-proxy-container mcp-inspector-container mcp-stdio-proxy-container 2>/dev/null || true
+docker rm -f mcp-server-container mcp-stdio-proxy-container 2>/dev/null || true
 
 # Pull latest GHCR images
 echo "Pulling latest GHCR images..."
 docker pull ghcr.io/ev3lynx727/containerd-mcp-server:latest && echo "✓ Main image pulled" || echo "✗ Main image pull failed"
-docker pull ghcr.io/ev3lynx727/containerd-mcp-server-proxy:latest && echo "✓ Proxy image pulled" || echo "✗ Proxy image pull failed"
 docker pull ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest && echo "✓ STDIO proxy image pulled" || echo "✗ STDIO proxy image pull failed"
 
 # Start containers
@@ -54,28 +53,21 @@ sleep 10
 # Check container status
 echo ""
 echo "=== Container Status ==="
-check_container "netdata-container"
 check_container "mcp-server-container"
-check_container "mcp-netdata-proxy-container"
-check_container "mcp-inspector-container"
 check_container "mcp-stdio-proxy-container"
 
 # Test services
 echo ""
 echo "=== Service Accessibility ==="
-check_mcp_server "Netdata" "19999"
 check_mcp_server "MCP Everything" "3001"
 check_mcp_server "Playwright" "3002"
 check_mcp_server "REST API Tester" "3003"
-check_mcp_server "MCP Inspector" "6274"
 
 echo ""
 echo "=== Deployment Complete ==="
 echo "✓ Using GHCR pre-built images"
 echo ""
 echo "Access points:"
-echo "  - Netdata Dashboard: http://localhost:19999"
 echo "  - MCP Everything: http://localhost:3001"
 echo "  - Playwright: http://localhost:3002"
 echo "  - REST API Tester: http://localhost:3003"
-echo "  - MCP Inspector: http://localhost:6274"

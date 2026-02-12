@@ -76,7 +76,6 @@ pull_images() {
 
     local images=(
         "ghcr.io/ev3lynx727/containerd-mcp-server:latest"
-        "ghcr.io/ev3lynx727/containerd-mcp-server-proxy:latest"
         "ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest"
     )
 
@@ -124,8 +123,6 @@ verify_endpoints() {
         "3001:MCP servers"
         "3002:MCP servers"
         "3003:MCP servers"
-        "6274:MCP Inspector"
-        "19999:Netdata"
     )
 
     for endpoint in "${endpoints[@]}"; do
@@ -207,19 +204,6 @@ update_opencode_config() {
         log_info "Consider updating filesystem to use: http://localhost:8090/mcp with Bearer token"
     fi
 
-    # Add Netdata if not present
-    if ! grep -q '"netdata"' "$config_file"; then
-        sed -i '/"mcp": {/a\
-    "netdata": {\
-      "type": "remote",\
-      "url": "http://localhost:19999/sse",\
-      "enabled": true\
-    },' "$config_file"
-        log_success "Added Netdata to OpenCode config"
-    else
-        log_info "Netdata already configured"
-    fi
-
     log_success "OpenCode configuration updated"
 }
 
@@ -233,8 +217,6 @@ show_summary() {
     echo ""
     echo "Access Points:"
     echo " • MCP Servers: localhost:3001-3003"
-    echo " • MCP Inspector: http://localhost:6274"
-    echo " • Netdata: http://localhost:19999"
     echo " • MCP Gateway: http://localhost:8090/mcp"
     echo ""
     echo "Volumes Configured:"

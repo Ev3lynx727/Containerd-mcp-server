@@ -134,8 +134,6 @@ docker compose ps
 
 # Verify endpoints
 curl http://localhost:3001/sse  # MCP servers
-curl http://localhost:6274     # MCP Inspector
-curl http://localhost:19999    # Netdata
 ```
 
 ### OpenCode Integration
@@ -226,11 +224,6 @@ opencode agent list
       "url": "http://localhost:3001/sse",
       "enabled": true,
       "timeout": 60000
-    },
-    "netdata": {
-      "type": "remote",
-      "url": "http://localhost:19999/sse",
-      "enabled": true
     },
     "code-analysis-agent": {
       "type": "local",
@@ -337,12 +330,11 @@ opencode
 ### Network Issues
 ```bash
 # Check port availability
-netstat -tlnp | grep -E ':300[0-9]|:8090|:19999'
+netstat -tlnp | grep -E ':300[0-9]|:8090'
 
 # Test service endpoints
 curl http://localhost:3001/sse
 curl http://localhost:8090/health
-curl http://localhost:19999
 ```
 
 ## Architecture Overview
@@ -401,7 +393,6 @@ curl http://localhost:19999
 # Individual service checks
 curl http://localhost:8090/health    # Gateway
 curl http://localhost:3001/sse       # MCP servers
-curl http://localhost:19999          # Netdata
 opencode agent list                  # OpenCode agents
 ```
 
