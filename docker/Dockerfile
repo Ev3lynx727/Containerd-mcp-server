@@ -33,8 +33,8 @@ RUN apt update && apt install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install ruff (Python linter) and ruff MCP server
-RUN pip3 install ruff ruff-mcp-server --break-system-packages
+# Install ruff (Python linter) - our wrapper provides MCP functionality
+RUN pip3 install ruff --break-system-packages
 
 # Install mgrep (semantic grep tool for code and documents)
 RUN curl -L https://github.com/mixedbread-ai/mgrep/releases/latest/download/mgrep-linux-x64 -o /usr/local/bin/mgrep && \
