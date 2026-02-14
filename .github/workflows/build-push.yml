@@ -50,6 +50,13 @@ jobs:
         cp -r mcp-servers docker/
         cp -r mcp-proxy docker/
         cp -r config docker/ 2>/dev/null || mkdir -p docker/config
+        
+    - name: Verify copied files
+      run: |
+        echo "Contents of docker/ directory:"
+        ls -la docker/
+        echo "Contents of docker/mcp-proxy/:"
+        ls -la docker/mcp-proxy/ || echo "mcp-proxy not found"
 
     - name: Build and push main Docker image
       uses: docker/build-push-action@v5
