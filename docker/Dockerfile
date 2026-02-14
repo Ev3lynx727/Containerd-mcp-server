@@ -37,6 +37,9 @@ RUN apt update && apt install -y \
 # Install ruff (Python linter) - our wrapper provides MCP functionality
 RUN pip3 install ruff --break-system-packages
 
+# Install Fabric MCP (Microsoft Fabric Model Context Protocol server)
+RUN pip3 install ms-fabric-mcp-server --break-system-packages
+
 # Install mgrep (semantic grep tool for code and documents)
 RUN curl -L https://github.com/mixedbread-ai/mgrep/releases/latest/download/mgrep-linux-x64 -o /usr/local/bin/mgrep && \
     chmod +x /usr/local/bin/mgrep
@@ -107,8 +110,12 @@ RUN cat > /root/.config/opencode/config.jsonc << 'EOF'
       "type": "remote",
       "url": "http://localhost:3051/mcp",
       "enabled": true
+    },
+    "fabric": {
+      "type": "local",
+      "command": ["ms-fabric-mcp-server"],
+      "enabled": true
     }
-    // Docker MCP removed - it's a CLI tool, not HTTP server
   }
 }
 EOF
