@@ -58,7 +58,7 @@ WORKDIR /app
 ENV NODE_PATH=/usr/local/lib/node_modules:/app/node_modules
 
 # Copy environment file from config directory (if available)
-COPY ../config/.env* ./
+COPY config/.env* ./
 
 # Create opencode config directory
 RUN mkdir -p /root/.config/opencode
@@ -114,10 +114,10 @@ EOF
 # Expose ports for remote MCP servers
 EXPOSE 3000-3005
 
-# Copy MCP server files from parent directory (repo root)
-COPY ../mcp-servers/markdownlint-mcp-server.js /app/markdownlint-mcp-server.js
-COPY ../mcp-servers/shellcheck/shellcheck-mcp-server.py /app/shellcheck-mcp-server.py
-COPY ../mcp-servers/ruff/ruff-mcp-wrapper.py /app/ruff-mcp-wrapper.py
+# Copy MCP server files
+COPY mcp-servers/markdownlint-mcp-server.js /app/markdownlint-mcp-server.js
+COPY mcp-servers/shellcheck/shellcheck-mcp-server.py /app/shellcheck-mcp-server.py
+COPY mcp-servers/ruff/ruff-mcp-wrapper.py /app/ruff-mcp-wrapper.py
 RUN chmod +x /app/shellcheck-mcp-server.py /app/ruff-mcp-wrapper.py
 
 # Install local dependencies for MCP servers
@@ -129,8 +129,8 @@ RUN npm init -y && \
 # Reset working directory
 WORKDIR /app
 
-# Copy startup script from parent directory (repo root)
-COPY ../mcp-servers/start-mcp-servers.sh /app/start-mcp-servers.sh
+# Copy startup script
+COPY mcp-servers/start-mcp-servers.sh /app/start-mcp-servers.sh
 RUN chmod +x /app/start-mcp-servers.sh
 
 # Default command: start MCP servers

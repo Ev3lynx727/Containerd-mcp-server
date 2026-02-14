@@ -44,10 +44,16 @@ jobs:
           type=ref,event=tag
           type=raw,value=latest,enable={{is_default_branch}}
 
+    - name: Copy files for Docker build
+      run: |
+        # Copy necessary files to docker directory for build context
+        cp -r mcp-servers docker/
+        cp -r config docker/ 2>/dev/null || mkdir -p docker/config
+
     - name: Build and push main Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./docker
         file: docker/Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
@@ -60,7 +66,7 @@ jobs:
     - name: Build and push stdio-proxy Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./docker
         file: docker/Dockerfile.stdio-proxy
         platforms: linux/amd64,linux/arm64
         push: true
