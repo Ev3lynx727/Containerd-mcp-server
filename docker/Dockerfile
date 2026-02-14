@@ -58,7 +58,8 @@ WORKDIR /app
 ENV NODE_PATH=/usr/local/lib/node_modules:/app/node_modules
 
 # Copy environment file from config directory (if available)
-COPY config/.env* ./
+# Note: config/ directory may not exist in CI/CD (it's in .gitignore)
+RUN if [ -d "config" ]; then cp config/.env* ./ 2>/dev/null || true; fi
 
 # Create opencode config directory
 RUN mkdir -p /root/.config/opencode
