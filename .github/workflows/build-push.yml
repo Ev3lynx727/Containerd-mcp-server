@@ -48,6 +48,7 @@ jobs:
       run: |
         # Copy necessary files to docker directory for build context
         cp -r mcp-servers docker/
+        cp -r mcp-proxy docker/
         cp -r config docker/ 2>/dev/null || mkdir -p docker/config
 
     - name: Build and push main Docker image
