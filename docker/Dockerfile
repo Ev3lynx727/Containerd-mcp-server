@@ -10,6 +10,7 @@ RUN apt update && apt install -y \
     curl \
     wget \
     unzip \
+    docker.io \
     libnspr4 \
     libnss3 \
     libdbus-1-3 \
