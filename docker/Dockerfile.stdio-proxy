@@ -2,10 +2,11 @@ FROM node:18
 
 WORKDIR /app
 
-COPY mcp-proxy/package.json .
+# Copy mcp-proxy files (directory copied by workflow)
+COPY mcp-proxy/package.json ./package.json
 RUN npm install
 
-COPY mcp-proxy/proxy.js .
+COPY mcp-proxy/proxy.js ./proxy.js
 
 EXPOSE 3004
 
