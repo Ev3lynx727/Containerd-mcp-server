@@ -48,6 +48,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: docker/Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
@@ -60,7 +61,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: Dockerfile.stdio-proxy
+        file: docker/Dockerfile.stdio-proxy
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}-stdio-proxy:latest

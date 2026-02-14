@@ -75,7 +75,7 @@ pull_images() {
     log_info "Pulling latest GHCR images..."
 
     local images=(
-        "ghcr.io/ev3lynx727/containerd-mcp-server:latest"
+        "ghcr.io/ev3lynx727/containerd-mcp-server:master"
         "ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest"
     )
 

@@ -39,7 +39,7 @@ docker rm -f mcp-server-container mcp-stdio-proxy-container 2>/dev/null || true
 
 # Pull latest GHCR images
 echo "Pulling latest GHCR images..."
-docker pull ghcr.io/ev3lynx727/containerd-mcp-server:latest && echo "✓ Main image pulled" || echo "✗ Main image pull failed"
+docker pull ghcr.io/ev3lynx727/containerd-mcp-server:master && echo "✓ Main image pulled" || echo "✗ Main image pull failed"
 docker pull ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest && echo "✓ STDIO proxy image pulled" || echo "✗ STDIO proxy image pull failed"
 
 # Start containers

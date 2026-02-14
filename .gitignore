@@ -1,38 +1,34 @@
-# Environment files (contains API keys)
-.env
+# Dependencies
+node_modules/
 
 # Logs
+logs/*.log
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+# Environment
+config/.env
+.env.local
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Cache
+.ruff_cache/
+__pycache__/
+*.pyc
 
-# Node.js (if any local development occurs)
-node_modules/
-npm-debug.log
-yarn-error.log
+# Data
+mcp-data/*
+!mcp-data/.gitkeep
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Temporary files
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+temp/
 *.tmp
-*.temp
