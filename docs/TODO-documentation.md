@@ -8,15 +8,15 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 **Status:** EXISTS but needs major updates
 **Location:** `/home/ev3lynx/Project/Containerd-mcp-server/README.md`
 
-- [ ] Add section about MCP servers (shellcheck, ruff, markdownlint)
-- [ ] Update directory structure section to reflect new organized layout
+- [x] Add section about MCP servers (shellcheck, ruff, markdownlint)
+- [x] Update directory structure section to reflect new organized layout
   - Current structure: scripts/setup/, scripts/utils/, scripts/testing/, mcp-servers/, docker/, config/, docs/, logs/
-- [ ] Add installation instructions for MCP servers
+- [x] Add installation instructions for MCP servers
   - Reference: `./scripts/setup/install-mcp-servers.sh`
-- [ ] Add usage examples for @lint agent with shellcheck and ruff
-- [ ] Update Docker section to reference new `docker/` directory
+- [x] Add usage examples for @lint agent with shellcheck and ruff
+- [x] Update Docker section to reference new `docker/` directory
   - Path: `docker/docker-compose.yml`
-- [ ] Add troubleshooting section for MCP connection issues
+- [x] Add troubleshooting section for MCP connection issues
   - Bearer token updates
   - Container name mismatches
   - "Connection closed" errors
@@ -25,11 +25,12 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 **Status:** MISSING - needs creation
 **Location:** `/home/ev3lynx/Project/Containerd-mcp-server/docs/mcp-servers.md`
 
-- [ ] Create `docs/mcp-servers.md` with:
+- [x] Create `docs/mcp-servers.md` with:
   - Overview of available MCP servers
     - shellcheck (path: `mcp-servers/shellcheck/shellcheck-mcp-server.py`)
     - ruff (path: `mcp-servers/ruff/ruff-mcp-wrapper.py`)
     - markdownlint (path: `mcp-servers/markdownlint-mcp-server.js`)
+    - **fabric** (port: 3004)
   - ShellCheck MCP server documentation
     - Purpose: Shell script linting and analysis
     - Features: Supports bash, sh, dash, ksh
@@ -40,6 +41,10 @@ This document tracks documentation updates needed for the Containerd MCP Server 
     - Features: Fast Python linter written in Rust
     - Usage examples
     - Tools: `ruff_check`, `ruff_format`
+  - **Fabric MCP server documentation**
+    - Purpose: Microsoft Fabric integration
+    - Features: Workspace, dataset, report operations
+    - Port: 3004
   - Installation instructions
     - Run: `./scripts/setup/install-mcp-servers.sh`
   - Configuration in opencode.jsonc
@@ -48,7 +53,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 **Status:** EXISTS but needs updates
 **Location:** `/home/ev3lynx/Project/Containerd-mcp-server/docs/agent.md`
 
-- [ ] Update `docs/agent.md` to include:
+- [x] Update `docs/agent.md` to include:
   - New tools available: `shellcheck`, `ruff`
   - @lint agent capabilities with linting tools
   - @build agent capabilities with linting tools
@@ -66,14 +71,14 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 - `scripts/utils/restart-gateway.py` - Python version of restart script
 - `scripts/testing/test-mcp-tools.sh` - Tests MCP tool connectivity
 
-- [ ] Document `install-mcp-servers.sh` script usage
-- [ ] Add troubleshooting for "connection closed" errors
+- [x] Document `install-mcp-servers.sh` script usage
+- [x] Add troubleshooting for "connection closed" errors
   - Cause: Using CLI tools directly instead of MCP wrappers
   - Solution: Use Python wrappers (ruff-mcp-wrapper.py, shellcheck-mcp-server.py)
-- [ ] Document Bearer token auto-update with `restart-gateway.sh`
+- [x] Document Bearer token auto-update with `restart-gateway.sh`
   - Automatically extracts new token from gateway.log
   - Updates `~/.config/opencode/opencode.jsonc`
-- [ ] Add zsh shell configuration documentation
+- [x] Add zsh shell configuration documentation
   - Location: `$XDG_CONFIG_HOME/opencode/.opencode.json`
   - Shell path: `/bin/zsh` (or `/usr/bin/zsh`)
 
@@ -81,19 +86,19 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 **Status:** MISSING - needs creation
 **Suggested Location:** `/home/ev3lynx/Project/Containerd-mcp-server/docs/configuration.md`
 
-- [ ] Document opencode.jsonc structure
+- [x] Document opencode.jsonc structure
   - Location: `~/.config/opencode/opencode.jsonc`
   - Shell configuration section
   - MCP servers section
   - Agent configuration section
-- [ ] Explain MCP server configuration
+- [x] Explain MCP server configuration
   - Type: local vs remote
   - Command structure for docker exec
   - Timeout settings
-- [ ] Document agent configuration with new tools
+- [x] Document agent configuration with new tools
   - How to add `shellcheck: true` and `ruff: true` to agent tools
   - Permission settings
-- [ ] Add examples of custom agent configurations
+- [x] Add examples of custom agent configurations
 
 ### 6. Update Docker Documentation
 **Existing Files:**
@@ -102,12 +107,12 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 - `docker/docker-compose.yml` - Compose configuration
 - `docker/.dockerignore` - Docker ignore file
 
-- [ ] Update path references in docker-compose documentation
+- [x] Update path references in docker-compose documentation
   - Volume: `../mcp-data:/app/data`
   - Env file: `../config/.env`
-- [ ] Document new directory structure for Docker files
+- [x] Document new directory structure for Docker files
   - All Docker files moved to `docker/` directory
-- [ ] Add volume mount explanations
+- [x] Add volume mount explanations
   - docker.sock for Docker-in-Docker
   - mcp-data for persistent storage
   - vscode-server for VS Code integration
@@ -157,6 +162,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 │   └── .env
 ├── docs/
 │   ├── TODO-documentation.md
+│   ├── mcp-servers.md
 │   └── agent.md
 ├── logs/
 ├── mcp-data/
@@ -172,6 +178,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 - **ShellCheck:** `mcp-servers/shellcheck/shellcheck-mcp-server.py`
 - **Ruff:** `mcp-servers/ruff/ruff-mcp-wrapper.py`
 - **Markdownlint:** `mcp-servers/markdownlint-mcp-server.js`
+- **Fabric MCP:** `ms-fabric-mcp-server` (pip package, runs on port 3004)
 
 ## Quick Reference for Updates
 
@@ -214,17 +221,39 @@ This document tracks documentation updates needed for the Containerd MCP Server 
   - `path`: File or directory
   - `check`: Check only, don't modify (boolean)
 
+### Fabric MCP Server
+```json
+{
+  "fabric_mcp": {
+    "type": "local",
+    "command": ["python3", "-m", "ms_fabric_mcp_server"],
+    "enabled": true
+  }
+}
+```
+
+**Access:**
+- **Port:** 3004
+- **URL:** `http://localhost:3004`
+- **Mode:** HTTP server running in container
+
 ### Usage Examples
 
 **ShellCheck:**
 ```
-@lint Check this shell script: ./scripts/setup/install-mcp-servers.sh
+@lint Check this shell script for issues: /path/to/script.sh
 ```
 
 **Ruff:**
 ```
-@lint Lint this Python file: ./mcp-servers/ruff/ruff-mcp-wrapper.py
+@lint Lint this Python file: /path/to/file.py
 @lint Format all Python files in the project
+```
+
+**Fabric MCP:**
+```
+@build Get Fabric workspaces
+@build List datasets in Fabric
 ```
 
 ## Current Agent Configuration Status
@@ -269,6 +298,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
   - shellcheck and ruff are CLI tools, not MCP servers
   - Wrappers implement MCP protocol (JSON-RPC over stdio)
   - Without wrappers, tools exit immediately causing "connection closed"
+- Fabric MCP is installed via pip and runs on port 3004
 
 ## What's Already Done ✅
 
@@ -282,6 +312,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 ### MCP Server Implementation
 - [x] Created shellcheck-mcp-server.py wrapper
 - [x] Created ruff-mcp-wrapper.py wrapper (Python 3.11 compatible)
+- [x] **Added Fabric MCP server** - ms-fabric-mcp-server on port 3004
 - [x] Install script updated with correct paths (install-mcp-servers.sh)
 - [x] MCP servers installed in container
 - [x] Tested and verified connectivity
@@ -307,7 +338,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 
 - [x] **README.md** - Updated with new structure and MCP servers
   - [x] Directory structure section - Complete with new organized layout
-  - [x] MCP servers section - Documented shellcheck, ruff, markdownlint
+  - [x] MCP servers section - Documented shellcheck, ruff, markdownlint, fabric
   - [x] Installation instructions - Full setup guide with all steps
   - [x] Usage examples for @lint agent - Multiple examples provided
   - [x] Troubleshooting section - Common issues and solutions
@@ -315,6 +346,8 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 - [x] **docs/mcp-servers.md** - Created new documentation
   - [x] ShellCheck MCP server docs - Purpose, features, parameters, examples
   - [x] Ruff MCP server docs - Tools (ruff_check, ruff_format), examples
+  - [x] Markdownlint documentation
+  - [x] **Fabric MCP server docs** - Microsoft Fabric integration on port 3004
   - [x] Installation instructions - Automated and manual installation
   - [x] Configuration examples - opencode.jsonc snippets
   - [x] Troubleshooting section - Connection issues, token errors
@@ -356,7 +389,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 ## 📊 Documentation Completion Summary
 
 ### ✅ COMPLETED (High + Medium Priority)
-**Total: 28 items completed**
+**Total: 30 items completed**
 
 #### README.md - Complete overhaul
 - Added comprehensive features list
@@ -372,6 +405,7 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 - ShellCheck MCP server full documentation
 - Ruff MCP server with both tools (check/format)
 - Markdownlint documentation
+- **Fabric MCP server** - Microsoft Fabric integration on port 3004
 - Installation procedures
 - Configuration examples
 - Troubleshooting guide
@@ -393,12 +427,17 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 - Parameter reference tables
 - Validation procedures
 
+#### docs/TODO-documentation.md - Updated
+- Tracking all documentation tasks
+- Status updates for all items
+- Completion percentages
+
 ### 📁 Files Created/Updated
-1. ✅ `/home/ev3lynx/Project/Containerd-mcp-server/README.md` - Updated
-2. ✅ `/home/ev3lynx/Project/Containerd-mcp-server/docs/mcp-servers.md` - Created
-3. ✅ `/home/ev3lynx/Project/Containerd-mcp-server/docs/agent.md` - Updated
-4. ✅ `/home/ev3lynx/Project/Containerd-mcp-server/docs/configuration.md` - Created
-5. ✅ `/home/ev3lynx/Project/Containerd-mcp-server/docs/TODO-documentation.md` - Updated
+1. ✅ `README.md` - Updated
+2. ✅ `docs/mcp-servers.md` - Created
+3. ✅ `docs/agent.md` - Updated
+4. ✅ `docs/configuration.md` - Created
+5. ✅ `docs/TODO-documentation.md` - Updated
 
 ### 📈 Coverage
 - **High Priority:** 13/13 items ✅ (100%)
@@ -414,5 +453,5 @@ This document tracks documentation updates needed for the Containerd MCP Server 
 
 ---
 
-*Last Updated: 2026-02-14*
-*Documentation Version: 1.0.0*
+*Last Updated: 2026-02-15*
+*Documentation Version: 1.1.0*
