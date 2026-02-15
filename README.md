@@ -67,6 +67,9 @@ A Docker-based MCP (Model Context Protocol) server setup with multiple integrati
 - **ShellCheck** - Shell script linting (`mcp-servers/shellcheck/`)
 - **Ruff** - Python linting and formatting (`mcp-servers/ruff/`)
 - **Markdownlint** - Markdown linting (`mcp-servers/`)
+- **Fabric MCP** - Microsoft Fabric integration (`ms-fabric-mcp-server`)
+  - Port: 3004
+  - Python-based MCP server for Microsoft Fabric operations
 
 ## Docker
 

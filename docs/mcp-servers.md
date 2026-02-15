@@ -4,17 +4,19 @@ This document provides comprehensive documentation for the MCP (Model Context Pr
 
 ## Overview
 
-MCP servers extend the capabilities of AI assistants by providing specialized tools. This project includes three MCP servers:
+MCP servers extend the capabilities of AI assistants by providing specialized tools. This project includes four MCP servers:
 
 1. **ShellCheck** - Shell script linting and analysis
 2. **Ruff** - Python linting and formatting
 3. **Markdownlint** - Markdown linting
+4. **Fabric MCP** - Microsoft Fabric integration (HTTP mode on port 3004)
 
 ## Table of Contents
 
 - [ShellCheck MCP Server](#shellcheck-mcp-server)
 - [Ruff MCP Server](#ruff-mcp-server)
 - [Markdownlint MCP Server](#markdownlint-mcp-server)
+- [Fabric MCP Server](#fabric-mcp-server)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage Examples](#usage-examples)
@@ -175,6 +177,59 @@ Markdownlint is a Node.js-based linter for Markdown files that helps enforce con
 ### Tools
 
 The Markdownlint MCP server provides tools for linting and fixing Markdown files.
+
+---
+
+## Fabric MCP Server
+
+### Purpose
+
+Fabric MCP Server provides integration with Microsoft Fabric, allowing AI assistants to interact with Fabric workspaces, datasets, reports, and other resources.
+
+### Installation
+
+Installed via pip in the Dockerfile:
+```dockerfile
+RUN pip3 install ms-fabric-mcp-server --break-system-packages
+```
+
+### Location
+
+- **Package:** `ms-fabric-mcp-server`
+- **Container Path:** Available as Python module
+- **Port:** 3004 (HTTP mode)
+
+### Features
+
+- Microsoft Fabric workspace management
+- Dataset operations
+- Report interactions
+- Data pipeline management
+- Real-time connectivity via HTTP
+
+### Configuration
+
+The Fabric MCP server is configured in the container's MCP config:
+
+```json
+"fabric_mcp": {
+  "type": "local",
+  "command": ["python3", "-m", "ms_fabric_mcp_server"],
+  "enabled": true
+}
+```
+
+### Startup
+
+The server starts automatically on port 3004:
+```bash
+python3 -m ms_fabric_mcp_server --port 3004 --host 0.0.0.0
+```
+
+### Access
+
+When running, the Fabric MCP server is accessible at:
+- **HTTP:** `http://localhost:3004`
 
 ---
 
@@ -430,5 +485,5 @@ To add a new MCP server:
 
 ---
 
-**Last Updated:** 2026-02-14
-**Version:** 1.0.0
+**Last Updated:** 2026-02-15
+**Version:** 1.1.0
