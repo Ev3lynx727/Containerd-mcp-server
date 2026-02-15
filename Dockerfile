@@ -140,7 +140,7 @@ RUN npm init -y && \
 WORKDIR /app
 
 # Copy startup script
-COPY mcp-servers/start-mcp-servers.sh /app/start-mcp-servers.sh
+COPY start-mcp-servers.sh /app/start-mcp-servers.sh
 RUN chmod +x /app/start-mcp-servers.sh
 
 # Default command: start MCP servers
