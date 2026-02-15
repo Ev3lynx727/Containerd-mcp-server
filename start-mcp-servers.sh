@@ -23,6 +23,10 @@ echo "playwright started (HTTP on port 3002) PID $!"
 npx dkmaker-mcp-rest-api --port 3003 --host 0.0.0.0 &
 echo "rest_api_tester started (HTTP on port 3003) PID $!"
 
+# Start Fabric MCP server on port 3004
+python3 -m ms_fabric_mcp_server --port 3004 --host 0.0.0.0 &
+echo "fabric_mcp started (HTTP on port 3004) PID $!"
+
 # Start MarkdownLint MCP server (stdio mode) - commented out, using HTTP version
 # export NODE_PATH=/app/node_modules
 # node /app/markdownlint-mcp-server.js &

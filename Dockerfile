@@ -10,6 +10,7 @@ RUN apt update && apt install -y \
     curl \
     wget \
     unzip \
+    docker.io \
     libnspr4 \
     libnss3 \
     libdbus-1-3 \
@@ -28,7 +29,16 @@ RUN apt update && apt install -y \
     libxcursor1 \
     libxi6 \
     libgtk-3-0 \
+    shellcheck \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install ruff (Python linter) - our wrapper provides MCP functionality
+RUN pip3 install ruff --break-system-packages
+
+# Install Fabric MCP server
+RUN pip3 install ms-fabric-mcp-server --break-system-packages
 
 # Install mgrep (semantic grep tool for code and documents)
 RUN curl -L https://github.com/mixedbread-ai/mgrep/releases/latest/download/mgrep-linux-x64 -o /usr/local/bin/mgrep && \
@@ -51,8 +61,9 @@ WORKDIR /app
 # Set NODE_PATH for local module resolution
 ENV NODE_PATH=/usr/local/lib/node_modules:/app/node_modules
 
-# Copy environment file (if available)
-COPY .env* ./
+# Copy environment file from config directory (if available)
+# Note: config/ directory may not exist in CI/CD (it's in .gitignore)
+RUN if [ -d "config" ]; then cp config/.env* ./ 2>/dev/null || true; fi
 
 # Create opencode config directory
 RUN mkdir -p /root/.config/opencode
@@ -99,6 +110,11 @@ RUN cat > /root/.config/opencode/config.jsonc << 'EOF'
       "type": "remote",
       "url": "http://localhost:3051/mcp",
       "enabled": true
+    },
+    "fabric_mcp": {
+      "type": "local",
+      "command": ["python3", "-m", "ms_fabric_mcp_server"],
+      "enabled": true
     }
     // Docker MCP removed - it's a CLI tool, not HTTP server
   }
@@ -109,7 +125,10 @@ EOF
 EXPOSE 3000-3005
 
 # Copy MCP server files
-COPY markdownlint-mcp-server.js /app/markdownlint-mcp-server.js
+COPY mcp-servers/markdownlint-mcp-server.js /app/markdownlint-mcp-server.js
+COPY mcp-servers/shellcheck/shellcheck-mcp-server.py /app/shellcheck-mcp-server.py
+COPY mcp-servers/ruff/ruff-mcp-wrapper.py /app/ruff-mcp-wrapper.py
+RUN chmod +x /app/shellcheck-mcp-server.py /app/ruff-mcp-wrapper.py
 
 # Install local dependencies for MCP servers
 WORKDIR /app
@@ -121,7 +140,7 @@ RUN npm init -y && \
 WORKDIR /app
 
 # Copy startup script
-COPY start-mcp-servers.sh /app/start-mcp-servers.sh
+COPY mcp-servers/start-mcp-servers.sh /app/start-mcp-servers.sh
 RUN chmod +x /app/start-mcp-servers.sh
 
 # Default command: start MCP servers
