@@ -44,25 +44,18 @@ jobs:
           type=ref,event=tag
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Copy files for Docker build
+    - name: Verify build context
       run: |
-        # Copy necessary files to docker directory for build context
-        cp -r mcp-servers docker/
-        cp -r mcp-proxy docker/
-        cp -r config docker/ 2>/dev/null || mkdir -p docker/config
-        
-    - name: Verify copied files
-      run: |
-        echo "Contents of docker/ directory:"
-        ls -la docker/
-        echo "Contents of docker/mcp-proxy/:"
-        ls -la docker/mcp-proxy/ || echo "mcp-proxy not found"
+        echo "Contents of root directory:"
+        ls -la
+        echo "Contents of mcp-proxy/:"
+        ls -la mcp-proxy/ || echo "mcp-proxy not found"
 
     - name: Build and push main Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./docker
-        file: docker/Dockerfile
+        context: .
+        file: ./Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
@@ -74,8 +67,8 @@ jobs:
     - name: Build and push stdio-proxy Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./docker
-        file: docker/Dockerfile.stdio-proxy
+        context: .
+        file: ./Dockerfile.stdio-proxy
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}-stdio-proxy:latest
