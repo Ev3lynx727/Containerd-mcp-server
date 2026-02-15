@@ -75,8 +75,7 @@ pull_images() {
     log_info "Pulling latest GHCR images..."
 
     local images=(
-        "ghcr.io/ev3lynx727/containerd-mcp-server:latest"
-        "ghcr.io/ev3lynx727/containerd-mcp-server-proxy:latest"
+        "ghcr.io/ev3lynx727/containerd-mcp-server:master"
         "ghcr.io/ev3lynx727/containerd-mcp-server-stdio-proxy:latest"
     )
 
@@ -121,11 +120,10 @@ verify_endpoints() {
     log_info "Verifying service endpoints..."
 
     local endpoints=(
-        "3001:MCP servers"
-        "3002:MCP servers"
-        "3003:MCP servers"
-        "6274:MCP Inspector"
-        "19999:Netdata"
+        "3001:MCP Everything"
+        "3002:Playwright"
+        "3003:REST API Tester"
+        "3004:Fabric MCP"
     )
 
     for endpoint in "${endpoints[@]}"; do
@@ -207,19 +205,6 @@ update_opencode_config() {
         log_info "Consider updating filesystem to use: http://localhost:8090/mcp with Bearer token"
     fi
 
-    # Add Netdata if not present
-    if ! grep -q '"netdata"' "$config_file"; then
-        sed -i '/"mcp": {/a\
-    "netdata": {\
-      "type": "remote",\
-      "url": "http://localhost:19999/sse",\
-      "enabled": true\
-    },' "$config_file"
-        log_success "Added Netdata to OpenCode config"
-    else
-        log_info "Netdata already configured"
-    fi
-
     log_success "OpenCode configuration updated"
 }
 
@@ -232,9 +217,10 @@ show_summary() {
     $COMPOSE_CMD ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
     echo ""
     echo "Access Points:"
-    echo " • MCP Servers: localhost:3001-3003"
-    echo " • MCP Inspector: http://localhost:6274"
-    echo " • Netdata: http://localhost:19999"
+    echo " • MCP Everything: localhost:3001"
+    echo " • Playwright: localhost:3002"
+    echo " • REST API Tester: localhost:3003"
+    echo " • Fabric MCP: localhost:3004"
     echo " • MCP Gateway: http://localhost:8090/mcp"
     echo ""
     echo "Volumes Configured:"
