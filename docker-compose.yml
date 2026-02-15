@@ -11,6 +11,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ~/.vscodeserver:/root/.vscode-server
+      - ~:/home/user
       - ./mcp-data:/app/data
     env_file:
       - .env
