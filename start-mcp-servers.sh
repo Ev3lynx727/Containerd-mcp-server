@@ -23,9 +23,9 @@ echo "playwright started (HTTP on port 3002) PID $!"
 npx dkmaker-mcp-rest-api --port 3003 --host 0.0.0.0 &
 echo "rest_api_tester started (HTTP on port 3003) PID $!"
 
-# Start Fabric MCP server on port 3011
-python3 -m ms_fabric_mcp_server --port 3011 --host 0.0.0.0 &
-echo "fabric_mcp started (HTTP on port 3011) PID $!"
+# Fabric MCP is stdio-only, will be used via docker exec
+# python3 -m ms_fabric_mcp_server --port 3011 --host 0.0.0.0 &
+# echo "fabric_mcp started (HTTP on port 3011) PID $!"
 
 # Start MarkdownLint MCP server (HTTP mode on port 3005)
 if [ -f "/app/markdownlint-mcp-server.js" ]; then
