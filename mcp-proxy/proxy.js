@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 
-const MAX_SESSIONS = 10;
+const MAX_SESSIONS = 20;
 const SESSION_TIMEOUT = 300000;
 const CLEANUP_INTERVAL = 60000;
 
@@ -15,7 +15,9 @@ const sessions = new Map();
 
 function killProcess(session) {
   if (session && session.process && !session.process.killed) {
-    session.process.stdin.end();
+    try {
+      session.process.stdin.end();
+    } catch (e) {}
     setTimeout(() => {
       if (!session.process.killed) {
         session.process.kill('SIGTERM');
@@ -24,7 +26,7 @@ function killProcess(session) {
   }
 }
 
-function createMCPSession(sessionId, command, args) {
+function createMCPSession(sessionId, command, args, env = {}) {
   if (sessions.size >= MAX_SESSIONS) {
     const oldestKey = sessions.keys().next().value;
     console.log(`Max sessions reached (${MAX_SESSIONS}), cleaning up oldest: ${oldestKey}`);
@@ -37,7 +39,7 @@ function createMCPSession(sessionId, command, args) {
 
   const child = spawn(command, args, {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=512' }
+    env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=512', ...env }
   });
 
   const session = {
@@ -89,6 +91,58 @@ function setupSessionHandler(session, res, sessionId) {
     console.error(`[${sessionId}] stdin error: ${err.message}`);
   });
 }
+
+const mcpServers = {
+  'shellcheck': {
+    command: 'python3',
+    args: ['/app/shellcheck-mcp-server.py']
+  },
+  'ruff': {
+    command: 'python3',
+    args: ['/app/ruff-mcp-wrapper.py']
+  },
+  'git': {
+    command: 'python3',
+    args: ['-m', 'mcp_server_git', '--repository', '/home/ev3lynx']
+  },
+  'fetch': {
+    command: 'python3',
+    args: ['-m', 'mcp_server_fetch']
+  }
+};
+
+Object.keys(mcpServers).forEach(serverName => {
+  app.post(`/${serverName}`, (req, res) => {
+    const sessionId = req.headers['session-id'] || 'default';
+    const key = `${serverName}-${sessionId}`;
+
+    let session = sessions.get(key);
+
+    if (!session || !session.process || session.process.killed) {
+      console.log(`Starting ${serverName} server for session ${sessionId}`);
+      const serverConfig = mcpServers[serverName];
+      session = createMCPSession(key, serverConfig.command, serverConfig.args);
+      setupSessionHandler(session, res, key);
+      sessions.set(key, session);
+    }
+
+    session.lastActivity = Date.now();
+
+    if (req.body) {
+      try {
+        session.process.stdin.write(JSON.stringify(req.body) + '\n');
+      } catch (e) {
+        if (!res.headersSent) {
+          res.status(500).json({ error: e.message });
+        }
+      }
+    }
+
+    res.on('close', () => {
+      session.lastActivity = Date.now();
+    });
+  });
+});
 
 app.post('/playwright', (req, res) => {
   const sessionId = req.headers['session-id'] || 'default';
@@ -154,7 +208,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     sessions: sessions.size,
-    maxSessions: MAX_SESSIONS
+    maxSessions: MAX_SESSIONS,
+    servers: Object.keys(mcpServers)
   });
 });
 
@@ -190,4 +245,5 @@ const PORT = process.env.PORT || 3004;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`MCP STDIO Proxy listening on port ${PORT}`);
   console.log(`Max sessions: ${MAX_SESSIONS}, Session timeout: ${SESSION_TIMEOUT}ms`);
+  console.log(`Available servers: ${Object.keys(mcpServers).join(', ')}`);
 });

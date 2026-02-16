@@ -13,25 +13,26 @@ services:
       - ~/.vscodeserver:/root/.vscode-server
       - ~:/home/ev3lynx
       - ./mcp-data:/app/data
+      - ./mcp-proxy:/app/proxy
     env_file:
       - .env
     environment:
       - NODE_OPTIONS=--max-old-space-size=2048
       - NODE_PATH=/app/node_modules
-      - REST_BASE_URL=https://api.example.com
-      - AUTH_BEARER=${AUTH_BEARER:-}
-    cpu_shares: 512
-    cpus: 2.0
-    mem_limit: 2g
-    mem_reservation: 512m
-    pids_limit: 200
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - CONTEXT7_API_KEY=${CONTEXT7_API_KEY:-}
+    cpu_shares: 1024
+    cpus: 4.0
+    mem_limit: 4g
+    mem_reservation: 1g
+    pids_limit: 500
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   mcp-stdio-proxy:
     build:
@@ -44,9 +45,9 @@ services:
       - mcp-server
     environment:
       - NODE_OPTIONS=--max-old-space-size=512
-    cpu_shares: 256
-    cpus: 1.0
-    mem_limit: 512m
+    cpu_shares: 512
+    cpus: 2.0
+    mem_limit: 1g
     restart: unless-stopped
 
 volumes:

@@ -41,6 +41,13 @@ RUN pip3 install ruff --break-system-packages
 # Install Fabric MCP server
 RUN pip3 install ms-fabric-mcp-server --break-system-packages
 
+# Install Python MCP servers
+RUN pip3 install \
+  mcp-server-git \
+  mcp-server-fetch \
+  mcp-server-time \
+  --break-system-packages
+
 # Install mgrep (semantic grep tool for code and documents)
 RUN curl -L https://github.com/mixedbread-ai/mgrep/releases/latest/download/mgrep-linux-x64 -o /usr/local/bin/mgrep && \
   chmod +x /usr/local/bin/mgrep
@@ -48,6 +55,13 @@ RUN curl -L https://github.com/mixedbread-ai/mgrep/releases/latest/download/mgre
 # Install global Node packages for MCP servers
 RUN npm install -g \
   @modelcontextprotocol/sdk@1.25.1 \
+  @modelcontextprotocol/server-everything \
+  @modelcontextprotocol/server-memory \
+  @modelcontextprotocol/server-sequential-thinking \
+  @modelcontextprotocol/server-github \
+  @modelcontextprotocol/server-filesystem \
+  mcp-ripgrep \
+  editorconfig-mcp-server \
   @playwright/mcp \
   dkmaker-mcp-rest-api \
   @0xshariq/docker-mcp-server \
