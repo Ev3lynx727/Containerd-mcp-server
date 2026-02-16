@@ -7,118 +7,187 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 
-// Store active sessions
+const MAX_SESSIONS = 10;
+const SESSION_TIMEOUT = 300000;
+const CLEANUP_INTERVAL = 60000;
+
 const sessions = new Map();
 
-// Playwright MCP server
+function killProcess(session) {
+  if (session && session.process && !session.process.killed) {
+    session.process.stdin.end();
+    setTimeout(() => {
+      if (!session.process.killed) {
+        session.process.kill('SIGTERM');
+      }
+    }, 1000);
+  }
+}
+
+function createMCPSession(sessionId, command, args) {
+  if (sessions.size >= MAX_SESSIONS) {
+    const oldestKey = sessions.keys().next().value;
+    console.log(`Max sessions reached (${MAX_SESSIONS}), cleaning up oldest: ${oldestKey}`);
+    const oldSession = sessions.get(oldestKey);
+    if (oldSession) {
+      killProcess(oldSession);
+      sessions.delete(oldestKey);
+    }
+  }
+
+  const child = spawn(command, args, {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=512' }
+  });
+
+  const session = {
+    process: child,
+    lastActivity: Date.now(),
+    buffer: ''
+  };
+
+  child.on('exit', (code) => {
+    console.log(`Process exited for session ${sessionId}, code: ${code}`);
+    sessions.delete(sessionId);
+  });
+
+  child.on('error', (err) => {
+    console.error(`Process error for session ${sessionId}: ${err.message}`);
+    sessions.delete(sessionId);
+  });
+
+  return session;
+}
+
+function setupSessionHandler(session, res, sessionId) {
+  session.process.stdout.on('data', (data) => {
+    session.buffer += data.toString();
+    
+    let newlineIndex;
+    while ((newlineIndex = session.buffer.indexOf('\n')) !== -1) {
+      const line = session.buffer.slice(0, newlineIndex);
+      session.buffer = session.buffer.slice(newlineIndex + 1);
+      
+      if (line.trim()) {
+        try {
+          const message = JSON.parse(line);
+          if (!res.headersSent) {
+            res.json(message);
+            res.end();
+          }
+        } catch (e) {
+        }
+      }
+    }
+  });
+
+  session.process.stderr.on('data', (data) => {
+    console.error(`[${sessionId}] stderr: ${data}`);
+  });
+
+  session.process.stdin.on('error', (err) => {
+    console.error(`[${sessionId}] stdin error: ${err.message}`);
+  });
+}
+
 app.post('/playwright', (req, res) => {
   const sessionId = req.headers['session-id'] || 'default';
+  const key = `playwright-${sessionId}`;
 
-  if (!sessions.has(sessionId)) {
+  let session = sessions.get(key);
+
+  if (!session || !session.process || session.process.killed) {
     console.log(`Starting Playwright server for session ${sessionId}`);
-    const child = spawn('npx', ['@playwright/mcp'], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+    session = createMCPSession(key, 'npx', ['-y', '@playwright/mcp']);
+    setupSessionHandler(session, res, key);
+    sessions.set(key, session);
+  }
 
-    sessions.set(sessionId, {
-      process: child,
-      lastActivity: Date.now()
-    });
+  session.lastActivity = Date.now();
 
-    // Handle MCP protocol over STDIO
-    let buffer = '';
-    child.stdout.on('data', (data) => {
-      buffer += data.toString();
-      // Process MCP messages (simplified)
-      if (buffer.includes('\n')) {
-        try {
-          const message = JSON.parse(buffer.trim());
-          // Forward to HTTP response
-          res.json(message);
-        } catch (e) {
-          // Not a complete message yet
-        }
+  if (req.body) {
+    try {
+      session.process.stdin.write(JSON.stringify(req.body) + '\n');
+    } catch (e) {
+      if (!res.headersSent) {
+        res.status(500).json({ error: e.message });
       }
-    });
-
-    child.stderr.on('data', (data) => {
-      console.error(`Playwright stderr: ${data}`);
-    });
-
-    child.on('exit', () => {
-      sessions.delete(sessionId);
-    });
+    }
   }
 
-  // Forward request to STDIO process
-  const session = sessions.get(sessionId);
-  if (session && req.body) {
-    session.process.stdin.write(JSON.stringify(req.body) + '\n');
+  res.on('close', () => {
     session.lastActivity = Date.now();
-  }
+  });
 });
 
-// REST API Tester MCP server
 app.post('/rest-api', (req, res) => {
   const sessionId = req.headers['session-id'] || 'default';
+  const key = `rest-${sessionId}`;
 
-  if (!sessions.has(`rest-${sessionId}`)) {
+  let session = sessions.get(key);
+
+  if (!session || !session.process || session.process.killed) {
     console.log(`Starting REST API server for session ${sessionId}`);
-    const child = spawn('npx', ['dkmaker-mcp-rest-api'], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+    session = createMCPSession(key, 'npx', ['-y', 'dkmaker-mcp-rest-api']);
+    setupSessionHandler(session, res, key);
+    sessions.set(key, session);
+  }
 
-    sessions.set(`rest-${sessionId}`, {
-      process: child,
-      lastActivity: Date.now()
-    });
+  session.lastActivity = Date.now();
 
-    let buffer = '';
-    child.stdout.on('data', (data) => {
-      buffer += data.toString();
-      if (buffer.includes('\n')) {
-        try {
-          const message = JSON.parse(buffer.trim());
-          res.json(message);
-        } catch (e) {
-          // Not a complete message yet
-        }
+  if (req.body) {
+    try {
+      session.process.stdin.write(JSON.stringify(req.body) + '\n');
+    } catch (e) {
+      if (!res.headersSent) {
+        res.status(500).json({ error: e.message });
       }
-    });
-
-    child.stderr.on('data', (data) => {
-      console.error(`REST API stderr: ${data}`);
-    });
-
-    child.on('exit', () => {
-      sessions.delete(`rest-${sessionId}`);
-    });
+    }
   }
 
-  const session = sessions.get(`rest-${sessionId}`);
-  if (session && req.body) {
-    session.process.stdin.write(JSON.stringify(req.body) + '\n');
+  res.on('close', () => {
     session.lastActivity = Date.now();
-  }
+  });
 });
 
-// Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', sessions: sessions.size });
+  res.json({ 
+    status: 'ok', 
+    sessions: sessions.size,
+    maxSessions: MAX_SESSIONS
+  });
 });
 
-// Cleanup inactive sessions
+app.post('/cleanup', (req, res) => {
+  const now = Date.now();
+  let cleaned = 0;
+  
+  for (const [sessionId, session] of sessions.entries()) {
+    if (now - session.lastActivity > SESSION_TIMEOUT) {
+      console.log(`Cleaning up inactive session ${sessionId}`);
+      killProcess(session);
+      sessions.delete(sessionId);
+      cleaned++;
+    }
+  }
+  
+  res.json({ cleaned, remaining: sessions.size });
+});
+
 setInterval(() => {
   const now = Date.now();
+  
   for (const [sessionId, session] of sessions.entries()) {
-    if (now - session.lastActivity > 300000) { // 5 minutes
-      console.log(`Cleaning up inactive session ${sessionId}`);
-      session.process.kill();
+    if (now - session.lastActivity > SESSION_TIMEOUT) {
+      console.log(`Auto-cleaning inactive session ${sessionId}`);
+      killProcess(session);
       sessions.delete(sessionId);
     }
   }
-}, 60000);
+}, CLEANUP_INTERVAL);
 
-app.listen(3004, '0.0.0.0', () => {
-  console.log('MCP STDIO Proxy listening on port 3004');
+const PORT = process.env.PORT || 3004;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`MCP STDIO Proxy listening on port ${PORT}`);
+  console.log(`Max sessions: ${MAX_SESSIONS}, Session timeout: ${SESSION_TIMEOUT}ms`);
 });

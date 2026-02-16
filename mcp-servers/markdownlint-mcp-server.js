@@ -7,6 +7,36 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
+const CACHE_TTL = 60000;
+const fileCache = new Map();
+
+function getCachedFiles(directory) {
+  const now = Date.now();
+  const cached = fileCache.get(directory);
+  
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.files;
+  }
+  
+  try {
+    const result = execSync(`find "${directory}" -name "*.md" -type f 2>/dev/null`, {
+      encoding: 'utf8',
+      timeout: 10000,
+      maxBuffer: 1024 * 1024
+    });
+    const files = result.trim().split('\n').filter(Boolean);
+    
+    fileCache.set(directory, { files, timestamp: now });
+    return files;
+  } catch (error) {
+    return [];
+  }
+}
+
+function clearCache() {
+  fileCache.clear();
+}
+
 class MarkdownLintMCPServer {
   constructor() {
     this.server = new McpServer(
@@ -101,10 +131,6 @@ class MarkdownLintMCPServer {
     });
   }
 
-  setupRequestHandlers() {
-    // Initialize is handled automatically by the Server class
-  }
-
   async lintMarkdownFiles(args) {
     const { files, fix = false, config } = args;
 
@@ -115,21 +141,16 @@ class MarkdownLintMCPServer {
     const results = [];
 
     for (const filePattern of files) {
-      try {
-        // Expand glob patterns and find matching files
-        const matchingFiles = this.findMarkdownFiles(filePattern);
+      const matchingFiles = this.filterByPattern(filePattern);
 
-        if (matchingFiles.length === 0) {
-          results.push(`No markdown files found matching: ${filePattern}`);
-          continue;
-        }
+      if (matchingFiles.length === 0) {
+        results.push(`No markdown files found matching: ${filePattern}`);
+        continue;
+      }
 
-        for (const file of matchingFiles) {
-          const result = this.lintSingleFile(file, fix, config);
-          results.push(result);
-        }
-      } catch (error) {
-        results.push(`Error processing ${filePattern}: ${error.message}`);
+      for (const file of matchingFiles) {
+        const result = this.lintSingleFile(file, fix, config);
+        results.push(result);
       }
     }
 
@@ -147,8 +168,7 @@ class MarkdownLintMCPServer {
     const { directory = '/app', fix = false, config, pattern = '**/*.md' } = args;
 
     try {
-      const fullPattern = path.join(directory, pattern);
-      const files = this.findMarkdownFiles(fullPattern);
+      const files = this.filterByPattern(pattern, directory);
 
       if (files.length === 0) {
         return {
@@ -161,13 +181,15 @@ class MarkdownLintMCPServer {
         };
       }
 
-      const results = files.map(file => this.lintSingleFile(file, fix, config));
+      const results = files.slice(0, 100).map(file => this.lintSingleFile(file, fix, config));
+      const total = files.length;
+      const shown = results.length;
 
       return {
         content: [
           {
             type: 'text',
-            text: `Found ${files.length} markdown files in ${directory}:\n\n${results.join('\n\n')}`,
+            text: `Found ${total} markdown files in ${directory} (showing first ${shown}):\n\n${results.join('\n\n')}`,
           },
         ],
       };
@@ -184,38 +206,31 @@ class MarkdownLintMCPServer {
     }
   }
 
-  findMarkdownFiles(pattern) {
-    try {
-      // Use find command to locate markdown files
-      const result = execSync(`find /app -name "*.md" -type f 2>/dev/null`, { encoding: 'utf8' });
-      return result.trim().split('\n').filter(Boolean);
-    } catch (error) {
-      // Fallback to a simple glob approach
-      return this.simpleGlob(pattern);
+  filterByPattern(pattern, directory = '/app') {
+    const files = getCachedFiles(directory);
+    
+    if (pattern.includes('*')) {
+      const regex = this.globToRegex(pattern.replace(/\\/g, ''));
+      return files.filter(file => regex.test(path.basename(file)));
     }
+    
+    return files.includes(pattern) ? [pattern] : [];
   }
 
-  simpleGlob(pattern) {
-    // Simple glob implementation for markdown files
-    try {
-      const result = execSync(`find /app -name "*.md" -type f 2>/dev/null`, { encoding: 'utf8' });
-      return result.trim().split('\n').filter(file => {
-        // Simple pattern matching - could be enhanced
-        return file.includes('.md');
-      });
-    } catch (error) {
-      return [];
-    }
+  globToRegex(glob) {
+    const escaped = glob
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\?/g, '.');
+    return new RegExp(`^${escaped}$`, 'i');
   }
 
   lintSingleFile(filePath, fix = false, configPath = null) {
     try {
-      // Check if file exists
       if (!fs.existsSync(filePath)) {
         return `File not found: ${filePath}`;
       }
 
-      // Build markdownlint command
       let cmd = 'markdownlint';
 
       if (configPath && fs.existsSync(configPath)) {
@@ -228,7 +243,6 @@ class MarkdownLintMCPServer {
 
       cmd += ` "${filePath}"`;
 
-      // Run markdownlint
       const result = execSync(cmd, {
         encoding: 'utf8',
         timeout: 30000,
@@ -238,15 +252,14 @@ class MarkdownLintMCPServer {
       if (result.trim()) {
         return `${filePath}:\n${result.trim()}`;
       } else {
-        return `${filePath}: ✅ No issues found`;
+        return `${filePath}: No issues found`;
       }
 
     } catch (error) {
       if (error.status === 1) {
-        // markdownlint found issues (exit code 1)
         return `${filePath}:\n${error.stdout || error.stderr}`;
       } else {
-        return `${filePath}: Error running markdownlint: ${error.message}`;
+        return `${filePath}: Error: ${error.message}`;
       }
     }
   }
@@ -266,6 +279,5 @@ class MarkdownLintMCPServer {
   }
 }
 
-// Run the server
 const server = new MarkdownLintMCPServer();
 server.run().catch(console.error);

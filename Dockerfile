@@ -32,6 +32,7 @@ RUN apt update && apt install -y \
   shellcheck \
   python3 \
   python3-pip \
+  tini \
   && rm -rf /var/lib/apt/lists/*
 
 # Install ruff (Python linter) - our wrapper provides MCP functionality
@@ -142,6 +143,9 @@ WORKDIR /app
 # Copy startup script
 COPY start-mcp-servers.sh /app/start-mcp-servers.sh
 RUN chmod +x /app/start-mcp-servers.sh
+
+# Use tini as init process to handle zombie processes
+ENTRYPOINT ["/usr/bin/tini", "--"]
 
 # Default command: start MCP servers
 CMD ["bash", "/app/start-mcp-servers.sh"]

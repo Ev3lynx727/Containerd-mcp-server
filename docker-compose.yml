@@ -20,12 +20,18 @@ services:
       - NODE_PATH=/app/node_modules
       - REST_BASE_URL=https://api.example.com
       - AUTH_BEARER=${AUTH_BEARER:-}
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
+    cpu_shares: 512
+    cpus: 2.0
+    mem_limit: 2g
+    mem_reservation: 512m
+    pids_limit: 200
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   mcp-stdio-proxy:
     build:
@@ -36,6 +42,11 @@ services:
     network_mode: host
     depends_on:
       - mcp-server
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=512
+    cpu_shares: 256
+    cpus: 1.0
+    mem_limit: 512m
     restart: unless-stopped
 
 volumes:
