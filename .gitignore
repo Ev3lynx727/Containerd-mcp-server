@@ -6,8 +6,10 @@ logs/*.log
 *.log
 
 # Environment
+.env
 config/.env
 .env.local
+.env.gateway
 
 # Cache
 .ruff_cache/

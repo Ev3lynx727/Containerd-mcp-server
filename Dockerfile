@@ -122,7 +122,7 @@ RUN cat > /root/.config/opencode/config.jsonc << 'EOF'
 EOF
 
 # Expose ports for remote MCP servers
-EXPOSE 3000-3005
+EXPOSE 3000-3020
 
 # Copy MCP server files
 COPY mcp-servers/markdownlint-mcp-server.js /app/markdownlint-mcp-server.js

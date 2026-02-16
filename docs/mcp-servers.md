@@ -8,8 +8,8 @@ MCP servers extend the capabilities of AI assistants by providing specialized to
 
 1. **ShellCheck** - Shell script linting and analysis
 2. **Ruff** - Python linting and formatting
-3. **Markdownlint** - Markdown linting
-4. **Fabric MCP** - Microsoft Fabric integration (HTTP mode on port 3004)
+3. **Markdownlint** - Markdown linting (HTTP mode on port 3005)
+4. **Fabric MCP** - Microsoft Fabric integration (HTTP mode on port 3011)
 
 ## Table of Contents
 
@@ -178,6 +178,12 @@ Markdownlint is a Node.js-based linter for Markdown files that helps enforce con
 
 The Markdownlint MCP server provides tools for linting and fixing Markdown files.
 
+### Access
+
+When running, the Markdownlint MCP server is accessible at:
+
+- **HTTP:** `http://localhost:3005`
+
 ---
 
 ## Fabric MCP Server
@@ -189,6 +195,7 @@ Fabric MCP Server provides integration with Microsoft Fabric, allowing AI assist
 ### Installation
 
 Installed via pip in the Dockerfile:
+
 ```dockerfile
 RUN pip3 install ms-fabric-mcp-server --break-system-packages
 ```
@@ -197,7 +204,7 @@ RUN pip3 install ms-fabric-mcp-server --break-system-packages
 
 - **Package:** `ms-fabric-mcp-server`
 - **Container Path:** Available as Python module
-- **Port:** 3004 (HTTP mode)
+- **Port:** 3011 (HTTP mode)
 
 ### Features
 
@@ -221,15 +228,17 @@ The Fabric MCP server is configured in the container's MCP config:
 
 ### Startup
 
-The server starts automatically on port 3004:
+The server starts automatically on port 3011:
+
 ```bash
-python3 -m ms_fabric_mcp_server --port 3004 --host 0.0.0.0
+python3 -m ms_fabric_mcp_server --port 3011 --host 0.0.0.0
 ```
 
 ### Access
 
 When running, the Fabric MCP server is accessible at:
-- **HTTP:** `http://localhost:3004`
+
+- **HTTP:** `http://localhost:3011`
 
 ---
 
@@ -244,6 +253,7 @@ Run the installation script to copy all MCP server wrappers to the container:
 ```
 
 This script will:
+
 1. Check if the mcp-server-container is running
 2. Copy ruff-mcp-wrapper.py to the container
 3. Copy shellcheck-mcp-server.py to the container
@@ -282,6 +292,7 @@ docker exec mcp-server-container ls -la /app/*.py /app/*.js
 ```
 
 You should see:
+
 - `/app/shellcheck-mcp-server.py`
 - `/app/ruff-mcp-wrapper.py`
 - `/app/markdownlint-mcp-server.js`
@@ -397,6 +408,7 @@ Use ruff to check ./scripts/utils/restart-gateway.sh
 **Cause:** Using the CLI tool directly instead of the MCP wrapper.
 
 **Solution:** Ensure you're using the Python wrappers:
+
 - `/app/shellcheck-mcp-server.py` (not `shellcheck`)
 - `/app/ruff-mcp-wrapper.py` (not `ruff`)
 
@@ -405,6 +417,7 @@ Use ruff to check ./scripts/utils/restart-gateway.sh
 **Cause:** Bearer token has expired after gateway restart.
 
 **Solution:** Run the restart script to update the token:
+
 ```bash
 ./scripts/utils/restart-gateway.sh
 ```
@@ -414,6 +427,7 @@ Use ruff to check ./scripts/utils/restart-gateway.sh
 **Cause:** The mcp-server-container is not running.
 
 **Solution:** Start the containers:
+
 ```bash
 cd docker && docker-compose up -d
 ```
@@ -423,6 +437,7 @@ cd docker && docker-compose up -d
 **Cause:** MCP wrappers haven't been copied to the container.
 
 **Solution:** Run the install script:
+
 ```bash
 ./scripts/setup/install-mcp-servers.sh
 ```
@@ -449,6 +464,7 @@ ShellCheck and Ruff are command-line tools, not native MCP servers. The wrappers
 ### Wrapper Design
 
 Each wrapper:
+
 - Reads JSON-RPC requests from stdin
 - Parses the tool name and parameters
 - Executes the underlying CLI tool
@@ -458,6 +474,7 @@ Each wrapper:
 ### Container Integration
 
 The wrappers are copied into the mcp-server-container at `/app/` and executed via `docker exec`. This ensures:
+
 - Consistent environment
 - Access to installed tools
 - Proper isolation

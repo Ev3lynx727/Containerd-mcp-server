@@ -23,14 +23,24 @@ echo "playwright started (HTTP on port 3002) PID $!"
 npx dkmaker-mcp-rest-api --port 3003 --host 0.0.0.0 &
 echo "rest_api_tester started (HTTP on port 3003) PID $!"
 
-# Start Fabric MCP server on port 3004
-python3 -m ms_fabric_mcp_server --port 3004 --host 0.0.0.0 &
-echo "fabric_mcp started (HTTP on port 3004) PID $!"
+# Start Fabric MCP server on port 3011
+python3 -m ms_fabric_mcp_server --port 3011 --host 0.0.0.0 &
+echo "fabric_mcp started (HTTP on port 3011) PID $!"
 
-# Start MarkdownLint MCP server (stdio mode) - commented out, using HTTP version
-# export NODE_PATH=/app/node_modules
-# node /app/markdownlint-mcp-server.js &
-echo "markdownlint started (stdio mode) PID $!"
+# Start MarkdownLint MCP server (HTTP mode on port 3005)
+if [ -f "/app/markdownlint-mcp-server.js" ]; then
+    if [ -d "/app/node_modules" ]; then
+        export NODE_PATH=/app/node_modules
+        node /app/markdownlint-mcp-server.js --port 3005 &
+        echo "markdownlint started (HTTP on port 3005) PID $!"
+    else
+        echo "WARNING: /app/node_modules not found. Skipping usage of NODE_PATH for markdownlint."
+        node /app/markdownlint-mcp-server.js --port 3005 &
+        echo "markdownlint started (HTTP on port 3005) PID $! (without NODE_PATH)"
+    fi
+else
+    echo "ERROR: /app/markdownlint-mcp-server.js not found. Skipping markdownlint startup."
+fi
 
 echo "MCP servers started. Container is running."
 # Keep the container alive

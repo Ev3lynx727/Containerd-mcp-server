@@ -252,12 +252,16 @@ class MarkdownLintMCPServer {
   }
 
   async run() {
+    const args = process.argv.slice(2);
+    const portArgIndex = args.indexOf('--port');
+    const port = portArgIndex !== -1 ? parseInt(args[portArgIndex + 1], 10) : 3005;
+
     console.log('Starting MarkdownLint MCP server...');
     const transport = new StreamableHTTPServerTransport();
     await this.server.connect(transport);
     const app = createMcpExpressApp(this.server, transport);
-    app.listen(3005, () => {
-      console.log('MarkdownLint MCP server started on port 3005');
+    app.listen(port, () => {
+      console.log(`MarkdownLint MCP server started on port ${port}`);
     });
   }
 }

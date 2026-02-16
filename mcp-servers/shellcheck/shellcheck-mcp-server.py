@@ -75,7 +75,7 @@ class ShellCheckMCPServer:
         tool_name = params.get("name", "")
         arguments = params.get("arguments", {})
 
-        if tool_name == "shellcheck":
+        if tool_name in ["shellcheck", "shellcheck_shellcheck"]:
             return await self.run_shellcheck(params.get("id"), arguments)
         else:
             return {
@@ -99,26 +99,48 @@ class ShellCheckMCPServer:
         try:
             # Run shellcheck
             result = subprocess.run(
-                ["shellcheck", "--format=gcc", "--shell", shell, file_path],
+                ["shellcheck", "-f", "json", "-s", shell, file_path],
                 capture_output=True,
                 text=True,
+                timeout=30,
             )
 
-            output = result.stdout if result.stdout else "No issues found!"
+            # Parse the JSON output
+            try:
+                issues = json.loads(result.stdout) if result.stdout else []
+            except json.JSONDecodeError:
+                issues = []
 
             return {
                 "jsonrpc": "2.0",
                 "id": request_id,
                 "result": {
-                    "content": [{"type": "text", "text": output}],
-                    "isError": result.returncode != 0,
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(
+                                {
+                                    "issues": issues,
+                                    "exit_code": result.returncode,
+                                    "file": file_path,
+                                },
+                                indent=2,
+                            ),
+                        }
+                    ]
                 },
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "error": {"code": -32603, "message": "Shellcheck timed out"},
             }
         except Exception as e:
             return {
                 "jsonrpc": "2.0",
                 "id": request_id,
-                "error": {"code": -32603, "message": f"ShellCheck error: {str(e)}"},
+                "error": {"code": -32603, "message": f"Shellcheck error: {str(e)}"},
             }
 
     async def run(self):
@@ -128,21 +150,15 @@ class ShellCheckMCPServer:
                 line = await asyncio.get_event_loop().run_in_executor(
                     None, sys.stdin.readline
                 )
-
-                if not line:
-                    break
-
                 try:
                     message = json.loads(line.strip())
                 except json.JSONDecodeError:
                     continue
 
                 method = message.get("method", "")
-                params = {
-                    k: v
-                    for k, v in message.items()
-                    if k not in ["jsonrpc", "method", "id"]
-                }
+                params = message.get("params", {})
+                if not isinstance(params, dict):
+                    params = {}
                 params["id"] = message.get("id")
 
                 if method == "initialize":
@@ -152,7 +168,6 @@ class ShellCheckMCPServer:
                 elif method == "tools/call":
                     response = await self.handle_tool_call(params)
                 else:
-                    # Unknown method - send error
                     response = {
                         "jsonrpc": "2.0",
                         "id": message.get("id"),
@@ -164,10 +179,16 @@ class ShellCheckMCPServer:
 
                 if message.get("id") is not None:
                     await self.send_message(response)
-
-            except Exception as e:
-                print(f"Error: {e}", file=sys.stderr)
+            except json.JSONDecodeError:
                 continue
+            except Exception as e:
+                await self.send_message(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {"code": -32603, "message": str(e)},
+                    }
+                )
 
 
 if __name__ == "__main__":

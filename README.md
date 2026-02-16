@@ -14,10 +14,6 @@ A Docker-based MCP (Model Context Protocol) server setup with multiple integrati
 │   ├── shellcheck/   # ShellCheck MCP server
 │   ├── ruff/         # Ruff Python linter MCP server
 │   └── start-mcp-servers.sh
-├── docker/           # Docker configuration
-│   ├── Dockerfile
-│   ├── Dockerfile.stdio-proxy
-│   └── docker-compose.yml
 ├── config/           # Configuration files
 │   └── .env
 ├── docs/             # Documentation
@@ -25,12 +21,16 @@ A Docker-based MCP (Model Context Protocol) server setup with multiple integrati
 ├── logs/             # Log files
 ├── mcp-data/         # MCP data directory
 ├── mcp-proxy/        # MCP proxy directory
-└── .github/          # GitHub configuration
+├── .github/          # GitHub configuration
+├── Dockerfile
+├── Dockerfile.stdio-proxy
+└── docker-compose.yml
 ```
 
 ## Quick Start
 
 ### Setup
+
 ```bash
 # Setup MCP Gateway
 ./scripts/setup/setup_mcp_gateway.sh
@@ -40,6 +40,7 @@ A Docker-based MCP (Model Context Protocol) server setup with multiple integrati
 ```
 
 ### Restart Gateway
+
 ```bash
 ./scripts/utils/restart-gateway.sh
 ```
@@ -47,35 +48,40 @@ A Docker-based MCP (Model Context Protocol) server setup with multiple integrati
 ## Scripts Reference
 
 ### Setup Scripts
+
 - `setup_mcp_gateway.sh` - Setup MCP Gateway
 - `setup-mcp-catalog.sh` - Setup MCP catalog
 - `setup-zsh-shell.sh` - Configure zsh shell for opencode
 - `install-mcp-servers.sh` - Install MCP servers (ruff, shellcheck)
 
 ### Utility Scripts
+
 - `restart-gateway.sh` - Restart MCP Gateway with Bearer token update
 - `restart-gateway.py` - Python version of restart script
 - `rebuild-and-deploy.sh` - Rebuild and deploy containers
 - `run-container.sh` - Run container scripts
 
 ### Testing Scripts
+
 - `test-mcp-tools.sh` - Test MCP tools (ruff, shellcheck)
 
 ## MCP Servers
 
 ### Included Servers
+
 - **ShellCheck** - Shell script linting (`mcp-servers/shellcheck/`)
 - **Ruff** - Python linting and formatting (`mcp-servers/ruff/`)
 - **Markdownlint** - Markdown linting (`mcp-servers/`)
+  - Port: 3005 (HTTP mode)
 - **Fabric MCP** - Microsoft Fabric integration (`ms-fabric-mcp-server`)
-  - Port: 3004
+  - Port: 3011
   - Python-based MCP server for Microsoft Fabric operations
 
 ## Docker
 
-Build and run:
+### Run
+
 ```bash
-cd docker
 docker-compose up -d
 ```
 

@@ -204,11 +204,9 @@ class RuffMCPServer:
                     continue
 
                 method = message.get("method", "")
-                params = {
-                    k: v
-                    for k, v in message.items()
-                    if k not in ["jsonrpc", "method", "id"]
-                }
+                params = message.get("params", {})
+                if not isinstance(params, dict):
+                    params = {}
                 params["id"] = message.get("id")
 
                 if method == "initialize":
