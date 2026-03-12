@@ -1,0 +1,41 @@
+name: Weekend Maintenance with Jules
+on:
+  schedule:
+    # Runs at 00:00 every Sunday
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # So you can trigger it manually to test
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Ghostclaw
+        uses: actions/checkout@v4
+
+      - name: Invoke Jules Agent
+        uses: google-labs/jules-invoke@v1
+        with:
+          api-key: ${{ secrets.JULES_API_KEY }}
+          # Explicit instructions for the weekend session
+          prompt: |
+            ACT as a Senior Systems Architect. 
+            TASK: Perform the 'Weekend Ghostclaw Pulse' maintenance.
+            
+            1. DEPENDENCY AUDIT: 
+               - Identify all outdated packages in package.json/requirements.txt.
+               - Upgrade to the latest STABLE versions only. 
+               - Run existing test suites to ensure no breaking changes in the core analysis engine.
+            
+            2. DOCUMENTATION SYNTHESIS:
+               - Analyze the last 7 days of git commits. 
+               - Update README.md 'Changelog' or 'Recent Updates' section with technical precision.
+               - Ensure the structure repository is accurately reflected in any new doc strings.
+            
+            3. ARCHITECTURAL SANITY CHECK:
+               - Verify that no AI agent logic has bled into the 'Production' configuration files.
+               - follow the established 'Dev-vs-Prod' isolation rules.
+            
+            4. DELIVERY:
+               - Consolidate all changes into a single branch named 'maint/weekend-update-$(date +%Y%m%d)'.
+               - Open a Pull Request titled "[Maintenance] Weekend Sync & Dependency Update".
+               - In the PR description, provide a bulleted summary of updated packages and a 'TL;DR' of documentation changes.
